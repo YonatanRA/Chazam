@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Chazam</title>
+  </head>
+  <body>
+    <div style="margin: 20px">
+      <img src="https://miro.medium.com/max/3150/1*NFwzjjur2atssvIlGia0AQ.jpeg" width="200" />
+      <h1>Chazam</h1>
+      <h2>Music Identifier</h2>
+      <pre id="log"></pre>
+      <ul id="recordingslist"></ul>
+      <div id="controls">
+        <button id="recordButton">Record</button>
+        <button id="stopButton">Stop</button>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/recorderjs/0.1.0/recorder.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+    <script src="js/uploadToCloudIdentifier.js"></script>
+    <script src="js/RecorderManager.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
