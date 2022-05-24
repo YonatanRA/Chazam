@@ -142,13 +142,13 @@ class ChazamTest(object):
         print ("result_match matrix:", self.result_match)
 
         # variable match precision (if matched in the corrected time)
-        self.result_matching_times = [[0 for x in xrange(self.n_columns)] for x in xrange(self.n_lines)] 
+        self.result_matching_times = [[0 for x in range(self.n_columns)] for x in range(self.n_lines)] 
 
         # variable mahing time (query time) 
-        self.result_query_duration = [[0 for x in xrange(self.n_columns)] for x in xrange(self.n_lines)] 
+        self.result_query_duration = [[0 for x in range(self.n_columns)] for x in range(self.n_lines)] 
 
         # variable confidence
-        self.result_match_confidence = [[0 for x in xrange(self.n_columns)] for x in xrange(self.n_lines)] 
+        self.result_match_confidence = [[0 for x in range(self.n_columns)] for x in range(self.n_lines)] 
 
         self.begin()
 
