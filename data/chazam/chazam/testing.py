@@ -137,7 +137,7 @@ class ChazamTest(object):
         print ("lines:", self.n_lines)
 
         # variable match results (yes, no, invalid)
-        self.result_match = [[0 for x in xrange(self.n_columns)] for x in xrange(self.n_lines)] 
+        self.result_match = [[0 for x in range(self.n_columns)] for x in range(self.n_lines)] 
 
         print ("result_match matrix:", self.result_match)
 

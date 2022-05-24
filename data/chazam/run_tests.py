@@ -87,10 +87,10 @@ tests = 1  # cha
 n_secs = len(test_seconds) 
 
 # set result variables -> 4d variables
-all_match_counter = [[[0 for x in xrange(tests)] for x in xrange(3)] for x in xrange(n_secs)]
-all_matching_times_counter = [[[0 for x in xrange(tests)] for x in xrange(2)] for x in xrange(n_secs)]
-all_query_duration = [[[0 for x in xrange(tests)] for x in xrange(cha.n_lines)] for x in xrange(n_secs)]
-all_match_confidence = [[[0 for x in xrange(tests)] for x in xrange(cha.n_lines)] for x in xrange(n_secs)]
+all_match_counter = [[[0 for x in range(tests)] for x in range(3)] for x in range(n_secs)]
+all_matching_times_counter = [[[0 for x in range(tests)] for x in range(2)] for x in range(n_secs)]
+all_query_duration = [[[0 for x in range(tests)] for x in range(cha.n_lines)] for x in range(n_secs)]
+all_match_confidence = [[[0 for x in range(tests)] for x in range(cha.n_lines)] for x in range(n_secs)]
 
 # group results by seconds
 for line in range(0, cha.n_lines):
