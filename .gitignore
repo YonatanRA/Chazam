@@ -10,6 +10,8 @@ __pycache__
 *.log
 /*.log
 selenium/
+*.wav
+/*.wav
 
 contraseñas.txt
 
