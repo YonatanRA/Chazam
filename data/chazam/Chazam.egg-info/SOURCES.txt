@@ -1,3 +1,7 @@
+.gitignore
+chazam.py
+requirements.txt
+run_tests.py
 setup.py
 Chazam.egg-info/PKG-INFO
 Chazam.egg-info/SOURCES.txt
@@ -10,4 +14,5 @@ chazam/decoder.py
 chazam/fingerprint.py
 chazam/recognize.py
 chazam/testing.py
+chazam/tools.py
 chazam/wavio.py
