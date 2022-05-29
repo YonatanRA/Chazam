@@ -3,8 +3,8 @@ from setuptools import find_packages, setup
 
 def parse_requirements(requirements):
     # load from requirements.txt
-    with open(requirements) as f:
-        lines = [l for l in f]
+    with open(requirements) as file:
+        lines = [line for line in file]
         # remove spaces
         stripped = list(map((lambda x: x.strip()), lines))
         # remove comments
