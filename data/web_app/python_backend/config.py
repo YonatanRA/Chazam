@@ -1,6 +1,5 @@
 import os
 
-# gdown --id ID -O FILE
 CONFIG={'database': {'host': 'yon.mysql.pythonanywhere-services.com',
                      'user': 'yon',
                      'password': 'password_1234567890',
