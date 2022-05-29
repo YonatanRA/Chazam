@@ -1,4 +1,4 @@
-const UPLOAD_IDENTIFIER_API = "http://yon.pythonanywhere.com/";
+const UPLOAD_IDENTIFIER_API = "http://yonrod.pythonanywhere.com/";
 
 const uploadToCloudIdentifier = async (blob) => {
   console.log("Uploading...");
