@@ -1,0 +1,28 @@
+Metadata-Version: 2.1
+Name: Chazam
+Version: 0.1
+Summary: Chazam: Audio Fingerprinting in Python
+Home-page: UNKNOWN
+Author: 
+Author-email: 
+Maintainer: 
+Maintainer-email: 
+License: MIT License
+Keywords: python,audio,fingerprinting,music,numpy,landmark
+Platform: Unix
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+
+
+                        Audio fingerprinting and recognition algorithm implemented in Python
+
+                        Chazam can memorize recorded audio by listening to it once and fingerprinting 
+                        it. Then by playing a song and recording microphone input or on disk file, 
+                        Chazam attempts to match the audio against the fingerprints held in the 
+                        database, returning the song or recording being played.
+                        
+
