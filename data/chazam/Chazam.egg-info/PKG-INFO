@@ -18,17 +18,11 @@ Classifier: Operating System :: OS Independent
 Classifier: Topic :: Software Development :: Libraries :: Python Modules
 
 
-Audio fingerprinting and recognition algorithm implemented in Python
+                        Audio fingerprinting and recognition algorithm implemented in Python
 
-See the explanation here: 
-
-`http://willdrevo.com/fingerprinting-and-audio-recognition-with-python/`__
-
-Chazam can memorize recorded audio by listening to it once and fingerprinting 
-it. Then by playing a song and recording microphone input or on disk file, 
-Chazam attempts to match the audio against the fingerprints held in the 
-database, returning the song or recording being played.
-
-__ http://willdrevo.com/fingerprinting-and-audio-recognition-with-python/
-
+                        Chazam can memorize recorded audio by listening to it once and fingerprinting 
+                        it. Then by playing a song and recording microphone input or on disk file, 
+                        Chazam attempts to match the audio against the fingerprints held in the 
+                        database, returning the song or recording being played.
+                        
 
