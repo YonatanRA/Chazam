@@ -6,7 +6,6 @@ import numpy as np
 
 from chazam.config.settings import DEFAULT_FS
 
-
 class BaseRecognizer(object, metaclass=abc.ABCMeta):
     def __init__(self, chazam):
         self.chazam = chazam
