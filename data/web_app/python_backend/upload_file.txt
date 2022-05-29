@@ -1,0 +1,3 @@
+# For upload database to pythonanywhere, in bash:
+
+gdown --id 1W3A1pOkDlHRC4NwAOB3TcuNwyoHXcvaw -O finger.sql
