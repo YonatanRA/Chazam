@@ -1,16 +1,16 @@
 from flask import Flask, request
-from flask_cors import CORS
+from flask_cors import CORS        # cross-origin resource sharing
 
 from chazam import Chazam
 
-from config import CONFIG, WAV_PATH, COVERS, DATA_DEFAULT
+from config import WAV_PATH, COVERS, DATA_DEFAULT
 
 
 app=Flask(__name__)
 
 cors=CORS(app, resources={r'*': {'origins': '*'}})
 
-ih_chazam=Chazam(CONFIG)
+ih_chazam=Chazam()
 
 
 @app.route('/', methods=['POST', 'GET'])
@@ -22,17 +22,17 @@ def main():
     song=ih_chazam.recognize(WAV_PATH)
 
     try:
-        if song['confidence'] < 100:
+        if song['results'][0]['input_confidence']<0.2:
             return f'{DATA_DEFAULT}', 200
 
         else:
 
-            song_name=song['song_name'].split('-')
+            song_name=song['results'][0]['song_name'].decode('utf-8').split('-')
 
             data={'artist': song_name[0].strip(),
                   'song': song_name[1].strip(),
-                  'cover': COVERS[song['song_name']],
-                  'match_time': song['match_time']
+                  'cover': COVERS[song['results'][0]['song_name'].decode('utf-8')],
+                  'match_time': song['total_time']
                   }
 
             return f'{data}', 200
