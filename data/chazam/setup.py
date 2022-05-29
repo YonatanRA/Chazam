@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-# import os, sys
 
 
 def parse_requirements(requirements):
@@ -14,30 +13,19 @@ def parse_requirements(requirements):
         reqs = filter((lambda x: x), nocomments)
         return reqs
 
-PACKAGE_NAME = 'Chazam'
-PACKAGE_VERSION = '0.1'
-SUMMARY = 'Chazam: Audio Fingerprinting in Python'
-DESCRIPTION = """
-Audio fingerprinting and recognition algorithm implemented in Python
-
-See the explanation here: 
-
-`http://willdrevo.com/fingerprinting-and-audio-recognition-with-python/`__
-
-Chazam can memorize recorded audio by listening to it once and fingerprinting 
-it. Then by playing a song and recording microphone input or on disk file, 
-Chazam attempts to match the audio against the fingerprints held in the 
-database, returning the song or recording being played.
-
-__ http://willdrevo.com/fingerprinting-and-audio-recognition-with-python/
-"""
-REQUIREMENTS = parse_requirements('requirements.txt')
 
 setup(
-    name=PACKAGE_NAME,
-    version=PACKAGE_VERSION,
-    description=SUMMARY,
-    long_description=DESCRIPTION,
+    name='Chazam',
+    version='0.1',
+    description='Chazam: Audio Fingerprinting in Python',
+    long_description='''
+                        Audio fingerprinting and recognition algorithm implemented in Python
+
+                        Chazam can memorize recorded audio by listening to it once and fingerprinting 
+                        it. Then by playing a song and recording microphone input or on disk file, 
+                        Chazam attempts to match the audio against the fingerprints held in the 
+                        database, returning the song or recording being played.
+                        ''',
     author='',
     author_email='',
     maintainer='',
@@ -47,7 +35,7 @@ setup(
     include_package_data=True,
     packages=find_packages(),
     platforms=['Unix'],
-    install_requires=REQUIREMENTS,
+    install_requires=parse_requirements('requirements.txt'),
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
@@ -56,5 +44,5 @@ setup(
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    keywords="python, audio, fingerprinting, music, numpy, landmark",
+    keywords='python, audio, fingerprinting, music, numpy, landmark',
 )
