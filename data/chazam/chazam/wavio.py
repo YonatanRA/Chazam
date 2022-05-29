@@ -9,7 +9,7 @@ import numpy as _np
 
 
 def _wav2array(nchannels, sampwidth, data):
-    """data must be the string containing the bytes from the wav file."""
+    '''data must be the string containing the bytes from the wav file.'''
     num_samples, remainder = divmod(len(data), sampwidth * nchannels)
     if remainder > 0:
         raise ValueError('The length of data is not a multiple of '
@@ -32,7 +32,7 @@ def _wav2array(nchannels, sampwidth, data):
 
 
 def readwav(file):
-    """
+    '''
     Read a WAV file.
 
     Parameters
@@ -58,7 +58,7 @@ def readwav(file):
     to read the WAV file, so it has the same limitations as that library.
     In particular, the function does not read compressed WAV files.
 
-    """
+    '''
     wav = _wave.open(file)
     rate = wav.getframerate()
     nchannels = wav.getnchannels()
@@ -67,11 +67,12 @@ def readwav(file):
     data = wav.readframes(nframes)
     wav.close()
     array = _wav2array(nchannels, sampwidth, data)
+    
     return rate, sampwidth, array
 
 
 def writewav24(filename, rate, data):
-    """
+    '''
     Create a 24 bit wav file.
 
     Parameters
@@ -103,7 +104,7 @@ def writewav24(filename, rate, data):
     >>> x = (2**23 - 1) * np.sin(2 * np.pi * f * t)
     >>> writewav24("sine24.wav", rate, x)
 
-    """
+    '''
     a32 = _np.asarray(data, dtype=_np.int32)
     if a32.ndim == 1:
         # Convert to a 2D array with a single column.
