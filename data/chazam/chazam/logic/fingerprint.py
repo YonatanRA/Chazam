@@ -52,7 +52,7 @@ def fingerprint(channel_samples: List[int],
     return generate_hashes(local_maxima, fan_value=fan_value)
 
 
-def get_2D_peaks(arr2D: np.array, amp_min: int = DEFAULT_AMP_MIN)\
+def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN)\
         -> List[Tuple[List[int], List[int]]]:
     """
     Extract maximum peaks from the spectogram matrix (arr2D).
@@ -83,17 +83,17 @@ def get_2D_peaks(arr2D: np.array, amp_min: int = DEFAULT_AMP_MIN)\
     neighborhood = iterate_structure(struct, PEAK_NEIGHBORHOOD_SIZE)
 
     # find local maxima using our filter mask
-    local_max = maximum_filter(arr2D, footprint=neighborhood) == arr2D
+    local_max = maximum_filter(arr, footprint=neighborhood) == arr2D
 
     # Applying erosion, the dejavu documentation does not talk about this step.
-    background = (arr2D == 0)
+    background = (arr == 0)
     eroded_background = binary_erosion(background, structure=neighborhood, border_value=1)
 
     # Boolean mask of arr2D with True at peaks (applying XOR on both matrices).
     detected_peaks = local_max != eroded_background
 
     # extract peaks
-    amps = arr2D[detected_peaks]
+    amps = arr[detected_peaks]
     freqs, times = np.where(detected_peaks)
 
     # filter peaks
@@ -108,7 +108,7 @@ def get_2D_peaks(arr2D: np.array, amp_min: int = DEFAULT_AMP_MIN)\
     return list(zip(freqs_filter, times_filter))
 
 
-def generate_hashes(peaks: List[Tuple[int, int]], fan_value: int = DEFAULT_FAN_VALUE) -> List[Tuple[str, int]]:
+def hashing(peaks: List[Tuple[int, int]], distance: int = 15) -> List[Tuple[str, int]]:
     """
     Hash list structure:
        sha1_hash[0:FINGERPRINT_REDUCTION]    time_offset
