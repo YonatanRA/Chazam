@@ -1,5 +1,12 @@
 # chazam
 
+# chazam SQL database connection
+
+SQL_CONFIG={'database': {'host': '127.0.0.1',
+                         'user': 'root',
+                         'password': 'password', 
+                         'database': 'fingerprint'}}
+
 # chazam JSON RESPONSE
 SONG_ID = 'song_id'
 SONG_NAME = 'song_name'

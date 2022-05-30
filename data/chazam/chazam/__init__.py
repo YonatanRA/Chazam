@@ -17,15 +17,14 @@ from chazam.config.settings import (DEFAULT_FS, DEFAULT_OVERLAP_RATIO,
                                     FINGERPRINTED_CONFIDENCE,
                                     FINGERPRINTED_HASHES, HASHES_MATCHED,
                                     INPUT_CONFIDENCE, INPUT_HASHES, OFFSET,
-                                    OFFSET_SECS, SONG_ID, SONG_NAME, TOPN)
+                                    OFFSET_SECS, SONG_ID, SONG_NAME, TOPN,
+                                    SQL_CONFIG)
 
 from chazam.logic.fingerprint import fingerprint
 
-from chazam.tools import CONFIG
-
 
 class Chazam:
-    def __init__(self, config: dict = CONFIG):
+    def __init__(self, config: dict = SQL_CONFIG):
         
         self.config = config
 
