@@ -49,7 +49,7 @@ def fingerprint(channel: List[int],
     local_maxima = get_spectrum_peaks(arr, amp_min=amp_min)
 
     # return hashes
-    return generate_hashes(local_maxima, fan_value=fan_value)
+    return hashing(local_maxima, distance=fan_value)
 
 
 def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN)\
