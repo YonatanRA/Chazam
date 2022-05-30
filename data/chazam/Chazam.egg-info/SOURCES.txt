@@ -7,7 +7,6 @@ Chazam.egg-info/dependency_links.txt
 Chazam.egg-info/requires.txt
 Chazam.egg-info/top_level.txt
 chazam/__init__.py
-chazam/tools.py
 chazam/base_classes/__init__.py
 chazam/base_classes/base_database.py
 chazam/base_classes/base_recognizer.py
@@ -21,5 +20,6 @@ chazam/logic/__init__.py
 chazam/logic/decoder.py
 chazam/logic/file_recognizer.py
 chazam/logic/fingerprint.py
-chazam/third_party/__init__.py
-chazam/third_party/wavio.py
+chazam/tools/__init__.py
+chazam/tools/audio.py
+chazam/tools/wavio.py

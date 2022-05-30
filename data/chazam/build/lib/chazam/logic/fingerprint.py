@@ -18,7 +18,7 @@ from chazam.config.settings import (CONNECTIVITY_MASK, DEFAULT_AMP_MIN,
                                     PEAK_NEIGHBORHOOD_SIZE, PEAK_SORT)
 
 
-def fingerprint(channel_samples: List[int],
+def fingerprint(channel: List[int],
                 Fs: int = DEFAULT_FS,
                 wsize: int = DEFAULT_WINDOW_SIZE,
                 wratio: float = DEFAULT_OVERLAP_RATIO,
@@ -27,7 +27,7 @@ def fingerprint(channel_samples: List[int],
     """
     FFT the channel, log transform output, find local maxima, then return locally sensitive hashes.
 
-    :param channel_samples: channel samples to fingerprint.
+    :param channel: channel samples to fingerprint.
     :param Fs: audio sampling rate.
     :param wsize: FFT windows size.
     :param wratio: ratio by which each sequential window overlaps the last and the next window.
@@ -36,23 +36,23 @@ def fingerprint(channel_samples: List[int],
     :return: a list of hashes with their corresponding offsets.
     """
     # FFT the signal and extract frequency components
-    arr2D = mlab.specgram(
-        channel_samples,
-        NFFT=wsize,
-        Fs=Fs,
-        window=mlab.window_hanning,
-        noverlap=int(wsize * wratio))[0]
+    arr = mlab.specgram(
+                        channel,
+                        NFFT=wsize,
+                        Fs=Fs,
+                        window=mlab.window_hanning,
+                        noverlap=int(wsize * wratio))[0]
 
     # Apply log transform since specgram function returns linear array. 0s are excluded to avoid np warning.
-    arr2D = 10 * np.log10(arr2D, out=np.zeros_like(arr2D), where=(arr2D != 0))
+    arr = 10 * np.log10(arr, out=np.zeros_like(arr), where=(arr != 0))
 
-    local_maxima = get_2D_peaks(arr2D, amp_min=amp_min)
+    local_maxima = get_spectrum_peaks(arr, amp_min=amp_min)
 
     # return hashes
     return generate_hashes(local_maxima, fan_value=fan_value)
 
 
-def get_2D_peaks(arr2D: np.array, amp_min: int = DEFAULT_AMP_MIN)\
+def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN)\
         -> List[Tuple[List[int], List[int]]]:
     """
     Extract maximum peaks from the spectogram matrix (arr2D).
@@ -83,17 +83,17 @@ def get_2D_peaks(arr2D: np.array, amp_min: int = DEFAULT_AMP_MIN)\
     neighborhood = iterate_structure(struct, PEAK_NEIGHBORHOOD_SIZE)
 
     # find local maxima using our filter mask
-    local_max = maximum_filter(arr2D, footprint=neighborhood) == arr2D
+    local_max = maximum_filter(arr, footprint=neighborhood) == arr
 
     # Applying erosion, the dejavu documentation does not talk about this step.
-    background = (arr2D == 0)
+    background = (arr == 0)
     eroded_background = binary_erosion(background, structure=neighborhood, border_value=1)
 
     # Boolean mask of arr2D with True at peaks (applying XOR on both matrices).
     detected_peaks = local_max != eroded_background
 
     # extract peaks
-    amps = arr2D[detected_peaks]
+    amps = arr[detected_peaks]
     freqs, times = np.where(detected_peaks)
 
     # filter peaks
@@ -108,14 +108,14 @@ def get_2D_peaks(arr2D: np.array, amp_min: int = DEFAULT_AMP_MIN)\
     return list(zip(freqs_filter, times_filter))
 
 
-def generate_hashes(peaks: List[Tuple[int, int]], fan_value: int = DEFAULT_FAN_VALUE) -> List[Tuple[str, int]]:
+def hashing(peaks: List[Tuple[int, int]], distance: int = 15) -> List[Tuple[str, int]]:
     """
     Hash list structure:
        sha1_hash[0:FINGERPRINT_REDUCTION]    time_offset
         [(e05b341a9b77a51fd26, 32), ... ]
 
     :param peaks: list of peak frequencies and times.
-    :param fan_value: degree to which a fingerprint can be paired with its neighbors.
+    :param distance: degree to which a fingerprint can be paired with its neighbors.
     :return: a list of hashes with their corresponding offsets.
     """
     # frequencies are in the first position of the tuples
@@ -128,7 +128,7 @@ def generate_hashes(peaks: List[Tuple[int, int]], fan_value: int = DEFAULT_FAN_V
 
     hashes = []
     for i in range(len(peaks)):
-        for j in range(1, fan_value):
+        for j in range(1, distance):
             if (i + j) < len(peaks):
 
                 freq1 = peaks[i][idx_freq]

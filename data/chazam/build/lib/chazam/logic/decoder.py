@@ -7,7 +7,7 @@ import numpy as np
 from pydub import AudioSegment
 from pydub.utils import audioop
 
-from chazam.third_party import wavio
+from chazam.tools import wavio
 
 
 def unique_hash(file_path: str, block_size: int = 2**20) -> str:
