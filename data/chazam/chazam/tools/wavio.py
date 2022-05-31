@@ -1,57 +1,16 @@
-# wavio.py
-# Author: Warren Weckesser
-# License: BSD 2-Clause (http://opensource.org/licenses/BSD-2-Clause)
-# Synopsis: A Python module for reading and writing 24 bit WAV files.
-# Github: github.com/WarrenWeckesser/wavio
-
-"""
-The wavio module defines the functions:
-read(file)
-    Read a WAV file and return a `wavio.Wav` object, with attributes
-    `data`, `rate` and `sampwidth`.
-write(filename, data, rate, scale=None, sampwidth=None)
-    Write a numpy array to a WAV file.
------
-Author: Warren Weckesser
-License: BSD 2-Clause:
-Copyright (c) 2015, Warren Weckesser
-All rights reserved.
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-1. Redistributions of source code must retain the above copyright notice,
-   this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-"""
-
-
 import wave as _wave
 
 import numpy as _np
 
-__version__ = "0.0.5.dev1"
-
 
 def _wav2array(nchannels, sampwidth, data):
-    """data must be the string containing the bytes from the wav file."""
+    '''data must be the string containing the bytes from the wav file.'''
     num_samples, remainder = divmod(len(data), sampwidth * nchannels)
     if remainder > 0:
         raise ValueError('The length of data is not a multiple of '
                          'sampwidth * num_channels.')
     if sampwidth > 4:
-        raise ValueError("sampwidth must not be greater than 4.")
+        raise ValueError('sampwidth must not be greater than 4.')
 
     if sampwidth == 3:
         a = _np.empty((num_samples, nchannels, 4), dtype=_np.uint8)
@@ -68,7 +27,7 @@ def _wav2array(nchannels, sampwidth, data):
 
 
 def _array2wav(a, sampwidth):
-    """
+    '''
     Convert the input array `a` to a string of WAV data.
     a.dtype must be one of uint8, int16 or int32.  Allowed sampwidth
     values are:
@@ -78,7 +37,7 @@ def _array2wav(a, sampwidth):
         int32      3 or 4
     When sampwidth is 3, the *low* bytes of `a` are assumed to contain
     the values to include in the string.
-    """
+    '''
     if sampwidth == 3:
         # `a` must have dtype int32
         if a.ndim == 1:
@@ -97,7 +56,7 @@ def _array2wav(a, sampwidth):
 
 
 class Wav(object):
-    """
+    '''
     Object returned by `wavio.read`.  Attributes are:
     data : numpy array
         The array of data read from the WAV file.
@@ -106,7 +65,7 @@ class Wav(object):
     sampwidth : int
         The sample width (i.e. number of bytes per sample) of the WAV file.
         For example, `sampwidth == 3` is a 24 bit WAV file.
-    """
+    '''
 
     def __init__(self, data, rate, sampwidth):
         self.data = data
@@ -114,13 +73,13 @@ class Wav(object):
         self.sampwidth = sampwidth
 
     def __repr__(self):
-        s = (f"Wav(data.shape={self.data.shape}, data.dtype={self.data.dtype}, "
-             f"rate={self.rate}, sampwidth={self.sampwidth})")
+        s = (f'Wav(data.shape={self.data.shape}, data.dtype={self.data.dtype}, '
+             f'rate={self.rate}, sampwidth={self.sampwidth})')
         return s
 
 
 def read(file):
-    """
+    '''
     Read a WAV file.
     Parameters
     ----------
@@ -152,7 +111,7 @@ def read(file):
     array `wav.data` is the data that was in the file.  When the file
     contains 24 bit samples, the resulting numpy array is 32 bit integers,
     with values that have been sign-extended.
-    """
+    '''
     wav = _wave.open(file)
     rate = wav.getframerate()
     nchannels = wav.getnchannels()
@@ -198,7 +157,7 @@ def _scale_to_sampwidth(data, sampwidth, vmin, vmax):
 
 
 def write(file, data, rate, scale=None, sampwidth=None):
-    """
+    '''
     Write the numpy array `data` to a WAV file.
     The Python standard library "wave" is used to write the data
     to the file, so this function has the same limitations as that
@@ -288,7 +247,7 @@ def write(file, data, rate, scale=None, sampwidth=None):
     >> w = wavio.read("foo.wav")
     >> w.data[:4, 0]
     array([ 88, 168,  88, 168], dtype=uint8)
-    """
+    '''
 
     if sampwidth is None:
         if not _np.issubdtype(data.dtype, _np.integer) or data.itemsize > 4:
@@ -301,9 +260,9 @@ def write(file, data, rate, scale=None, sampwidth=None):
     outdtype = _sampwidth_dtypes[sampwidth]
     outmin, outmax = _sampwidth_ranges[sampwidth]
 
-    if scale == "none":
+    if scale == 'none':
         data = data.clip(outmin, outmax-1).astype(outdtype)
-    elif scale == "dtype-limits":
+    elif scale == 'dtype-limits':
         if not _np.issubdtype(data.dtype, _np.integer):
             raise ValueError("scale cannot be 'dtype-limits' with non-integer data.")
         # Easy transforms that just changed the signedness of the data.
