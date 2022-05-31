@@ -24,7 +24,7 @@ def fingerprint(channel: List[int],
                 wratio: float = DEFAULT_OVERLAP_RATIO,
                 fan_value: int = DEFAULT_FAN_VALUE,
                 amp_min: int = DEFAULT_AMP_MIN) -> List[Tuple[str, int]]:
-    """
+    '''
     FFT the channel, log transform output, find local maxima, then return locally sensitive hashes.
 
     :param channel: channel samples to fingerprint.
@@ -34,7 +34,7 @@ def fingerprint(channel: List[int],
     :param fan_value: degree to which a fingerprint can be paired with its neighbors.
     :param amp_min: minimum amplitude in spectrogram in order to be considered a peak.
     :return: a list of hashes with their corresponding offsets.
-    """
+    '''
     # FFT the signal and extract frequency components
     arr = mlab.specgram(
                         channel,
@@ -54,14 +54,14 @@ def fingerprint(channel: List[int],
 
 def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN)\
         -> List[Tuple[List[int], List[int]]]:
-    """
-    Extract maximum peaks from the spectogram matrix (arr2D).
+    '''
+    Extract maximum peaks from the spectogram matrix (arr).
 
     :param arr2D: matrix representing the spectogram.
     :param plot: for plotting the results.
     :param amp_min: minimum amplitude in spectrogram in order to be considered a peak.
     :return: a list composed by a list of frequencies and times.
-    """
+    '''
     # Original code from the repo is using a morphology mask that does not consider diagonal elements
     # as neighbors (basically a diamond figure) and then applies a dilation over it, so what I'm proposing
     # is to change from the current diamond figure to a just a normal square one:
@@ -109,7 +109,7 @@ def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN)\
 
 
 def hashing(peaks: List[Tuple[int, int]], distance: int = 15) -> List[Tuple[str, int]]:
-    """
+    '''
     Hash list structure:
        sha1_hash[0:FINGERPRINT_REDUCTION]    time_offset
         [(e05b341a9b77a51fd26, 32), ... ]
@@ -117,7 +117,7 @@ def hashing(peaks: List[Tuple[int, int]], distance: int = 15) -> List[Tuple[str,
     :param peaks: list of peak frequencies and times.
     :param distance: degree to which a fingerprint can be paired with its neighbors.
     :return: a list of hashes with their corresponding offsets.
-    """
+    '''
     # frequencies are in the first position of the tuples
     idx_freq = 0
     # times are in the second position of the tuples
@@ -138,7 +138,7 @@ def hashing(peaks: List[Tuple[int, int]], distance: int = 15) -> List[Tuple[str,
                 t_delta = t2 - t1
 
                 if MIN_HASH_TIME_DELTA <= t_delta <= MAX_HASH_TIME_DELTA:
-                    h = hashlib.sha1(f"{str(freq1)}|{str(freq2)}|{str(t_delta)}".encode('utf-8'))
+                    h = hashlib.sha1(f'{str(freq1)}|{str(freq2)}|{str(t_delta)}'.encode('utf-8'))
 
                     hashes.append((h.hexdigest()[0:FINGERPRINT_REDUCTION], t1))
 

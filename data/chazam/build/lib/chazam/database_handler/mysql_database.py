@@ -116,7 +116,7 @@ class MySQLDatabase(CommonDatabase):
     """
 
     # IN
-    IN_MATCH = f"UNHEX(%s)"
+    IN_MATCH = f'UNHEX(%s)'
 
     def __init__(self, **options):
         super().__init__()
@@ -129,7 +129,7 @@ class MySQLDatabase(CommonDatabase):
         Cursor.clear_cache()
 
     def insert_song(self, song_name: str, file_hash: str, total_hashes: int) -> int:
-        """
+        '''
         Inserts a song name into the database, returns the new
         identifier of the song.
 
@@ -137,7 +137,7 @@ class MySQLDatabase(CommonDatabase):
         :param file_hash: Hash from the fingerprinted file.
         :param total_hashes: amount of hashes to be inserted on fingerprint table.
         :return: the inserted id.
-        """
+        '''
         with self.cursor() as cur:
             cur.execute(self.INSERT_SONG, (song_name, file_hash, total_hashes))
             return cur.lastrowid
@@ -158,13 +158,13 @@ def cursor_factory(**factory_options):
 
 
 class Cursor(object):
-    """
+    '''
     Establishes a connection to the database and returns an open cursor.
     # Use as context manager
     with Cursor() as cur:
         cur.execute(query)
         ...
-    """
+    '''
     def __init__(self, dictionary=False, **options):
         super().__init__()
 
