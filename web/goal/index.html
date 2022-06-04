@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>IronShazam</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+  <main>
+
+    <section id="listen-screen">
+
+      <nav id="sections-nav">
+        <a href="#">
+          <img src="./img/library.svg" alt="Library access"> Biblioteca
+        </a>
+        <a href="#">
+          <img src="./img/charts.svg" alt="Charts access">Trends
+        </a>
+      </nav>
+
+      <header>
+        <h1>IronShazam</h1>
+        <p id="statusText">Toca para escuchar</p>
+      </header>
+
+      <figure id="record">
+        <img src="./img/shazam_logo.svg" alt="Logo">
+        <div id="animation" class="show-on-listening"></div>
+      </figure>
+
+    </section>
+
+    <section id="results-screen">
+
+      <img src="https://bit.ly/3zhSAR9" alt="Album cover" id="albumCover">
+
+      <header>
+        <h1 id="artistName">Artist name</h1>
+        <p id="trackName">Track name</p>
+      </header>
+
+      <button id="restart">Volver a escuchar</button>
+
+    </section>
+
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/recorderjs/0.1.0/recorder.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+  <script src="js/uploadToCloudIdentifier.js"></script>
+  <script src="js/RecorderManager.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+
+</html>
