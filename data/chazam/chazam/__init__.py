@@ -42,14 +42,13 @@ class Chazam:
 
     def __load_fingerprinted_audio_hashes(self) -> None:
         """
-        Keeps a dictionary with the hashes of the fingerprinted songs, in that way is possible to check
-        whether or not an audio file was already processed.
+        Diccionario con los hashes de los fingerprints, para saber si una cancion ha sido procesada.
         """
 
-        # get songs previously indexed
+        # obtener canciones ya indexadas
         self.songs = self.db.get_songs()
 
-        self.songhashes_set = set()  # to know which ones we've computed before
+        self.songhashes_set = set()  # valores unicos para saber cuales ha sido ya fingerprinteadas
 
         for song in self.songs:
             song_hash = song[FIELD_FILE_SHA1]
