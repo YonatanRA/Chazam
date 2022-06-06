@@ -7,10 +7,7 @@ from time import time
 from typing import Dict, List, Tuple
 
 import chazam.logic.decoder as decoder
-from chazam.logic.file_recognizer import FileRecognizer
-
 from chazam.base_classes.base_database import get_database
-
 from chazam.config.settings import (DEFAULT_FS, DEFAULT_OVERLAP_RATIO,
                                     DEFAULT_WINDOW_SIZE, FIELD_FILE_SHA1,
                                     FIELD_TOTAL_HASHES,
@@ -19,78 +16,69 @@ from chazam.config.settings import (DEFAULT_FS, DEFAULT_OVERLAP_RATIO,
                                     INPUT_CONFIDENCE, INPUT_HASHES, OFFSET,
                                     OFFSET_SECS, SONG_ID, SONG_NAME, TOPN,
                                     SQL_CONFIG)
-
+from chazam.logic.file_recognizer import FileRecognizer
 from chazam.logic.fingerprint import fingerprint
 
 
-
 class Chazam:
+
     def __init__(self, config: dict = SQL_CONFIG):
-        
+
+
         self.config = config
 
-        # initialize db
+        # inicializar base de datos
         db_cls = get_database(config.get('database_type', 'mysql').lower())
-
         self.db = db_cls(**config.get('database', {}))
         self.db.setup()
 
-        # if we should limit seconds fingerprinted,
-        # None|-1 means use entire track
+        # si queremos limitar el tiempo de fingerprint en segundos, None o -1 significan la cancion entera
         self.limit = self.config.get('fingerprint_limit', None)
-        
-        if self.limit == -1:  # for JSON compatibility
+
+        if self.limit == -1:  # para compatibilidad JSON
             self.limit = None
-            
+
         self.__load_fingerprinted_audio_hashes()
-        
 
     def __load_fingerprinted_audio_hashes(self) -> None:
-        '''
+        """
         Keeps a dictionary with the hashes of the fingerprinted songs, in that way is possible to check
         whether or not an audio file was already processed.
-        '''
-        
+        """
+
         # get songs previously indexed
         self.songs = self.db.get_songs()
-        
-        self.songhashes_set = set()     # to know which ones we've computed before
-        
+
+        self.songhashes_set = set()  # to know which ones we've computed before
+
         for song in self.songs:
             song_hash = song[FIELD_FILE_SHA1]
             self.songhashes_set.add(song_hash)
-            
 
-            
     def get_fingerprinted_songs(self) -> List[Dict[str, any]]:
-        '''
+        """
         To pull all fingerprinted songs from the database.
 
         :return: a list of fingerprinted audios from the database.
-        '''
+        """
         return self.db.get_songs()
-    
-    
 
     def delete_songs_by_id(self, song_ids: List[int]) -> None:
-        '''
+        """
         Deletes all audios given their ids.
 
         :param song_ids: song ids to delete from the database.
-        '''
+        """
         self.db.delete_songs_by_id(song_ids)
-        
-        
 
-        
     def fingerprint_directory(self, path: str, extensions: str, nprocesses: int = None) -> None:
-        '''
+        """
         Given a directory and a set of extensions it fingerprints all files that match each extension specified.
 
         :param path: path to the directory.
         :param extensions: list of file extensions to consider.
         :param nprocesses: amount of processes to fingerprint the files within the directory.
-        '''
+        """
         # Try to use the maximum amount of processes if not given.
         try:
             nprocesses = nprocesses or multiprocessing.cpu_count()
@@ -100,8 +88,7 @@ class Chazam:
             nprocesses = 1 if nprocesses <= 0 else nprocesses
 
         pool = multiprocessing.Pool(nprocesses)
-        
-        
+
         filenames_to_fingerprint = []
         for filename, _ in decoder.find_files(path, extensions):
             # don't refingerprint already fingerprinted files
@@ -138,21 +125,19 @@ class Chazam:
 
         pool.close()
         pool.join()
-        
-       
-    
+
     def fingerprint_file(self, file_path: str, song_name: str = None) -> None:
-        '''
+        """
         Given a path to a file the method generates hashes for it and stores them in the database
         for later be queried.
 
         :param file_path: path to the file.
         :param song_name: song name associated to the audio file.
-        '''
+        """
         song_name_from_path = decoder.get_audio_name_from_path(file_path)
         song_hash = decoder.unique_hash(file_path)
         song_name = song_name or song_name_from_path
-        
+
         # don't refingerprint already fingerprinted files
         if song_hash in self.songhashes_set:
             print(f'{song_name} already fingerprinted, continuing...')
@@ -168,51 +153,42 @@ class Chazam:
             self.db.set_song_fingerprinted(sid)
             self.__load_fingerprinted_audio_hashes()
 
-            
-            
-            
     def generate_fingerprints(self, samples: List[int], Fs=DEFAULT_FS) -> Tuple[List[Tuple[str, int]], float]:
-        f'''
+        f"""
         Generate the fingerprints for the given sample data (channel).
 
         :param samples: list of ints which represents the channel info of the given audio file.
         :param Fs: sampling rate which defaults to {DEFAULT_FS}.
         :return: a list of tuples for hash and its corresponding offset, together with the generation time.
-        '''
+        """
         t = time()
-        
+
         hashes = fingerprint(samples, Fs=Fs)
-        
+
         fingerprint_time = time() - t
-        
+
         return hashes, fingerprint_time
 
-    
-    
-    
     def find_matches(self, hashes: List[Tuple[str, int]]) -> Tuple[List[Tuple[int, int]], Dict[str, int], float]:
-        '''
+        """
         Finds the corresponding matches on the fingerprinted audios for the given hashes.
 
         :param hashes: list of tuples for hashes and their corresponding offsets
         :return: a tuple containing the matches found against the db, a dictionary which counts the different
          hashes matched for each song (with the song id as key), and the time that the query took.
 
-        '''
+        """
         t = time()
-        
+
         matches, dedup_hashes = self.db.return_matches(hashes)
-        
+
         query_time = time() - t
 
         return matches, dedup_hashes, query_time
 
-    
-    
-    
     def align_matches(self, matches: List[Tuple[int, int]], dedup_hashes: Dict[str, int], queried_hashes: int,
                       topn: int = TOPN) -> List[Dict[str, any]]:
-        '''
+        """
         Finds hash matches that align in time with other matches and finds
         consensus about which hashes are "true" signal from the audio.
 
@@ -222,8 +198,8 @@ class Chazam:
         :param queried_hashes: amount of hashes sent for matching against the db
         :param topn: number of results being returned back.
         :return: a list of dictionaries (based on topn) with match information.
-        '''
-        
+        """
+
         # count offset occurrences per song and keep only the maximum ones.
         sorted_matches = sorted(matches, key=lambda m: (m[0], m[1]))
         counts = [(*key, len(list(group))) for key, group in groupby(sorted_matches, key=lambda m: (m[0], m[1]))]
@@ -231,8 +207,7 @@ class Chazam:
             [max(list(group), key=lambda g: g[2]) for key, group in groupby(counts, key=lambda count: count[0])],
             key=lambda count: count[2], reverse=True
         )
-        
-        
+
         songs_result = []
         for song_id, offset, _ in songs_matches[0:topn]:  # consider topn elements in the result
             song = self.db.get_song_by_id(song_id)
@@ -261,14 +236,10 @@ class Chazam:
 
         return songs_result
 
-    
-    
     def recognize(self, *options, **kwoptions) -> Dict[str, any]:
         r = FileRecognizer(self)
         return r.recognize(*options, **kwoptions)
 
-    
-    
     @staticmethod
     def _fingerprint_worker(arguments):
         # Pool.imap sends arguments as tuples so we have to unpack them ourself.
@@ -283,8 +254,6 @@ class Chazam:
 
         return song_name, fingerprints, file_hash
 
-    
-    
     @staticmethod
     def get_file_fingerprints(file_name: str, limit: int, print_output: bool = False):
         channels, fs, file_hash = decoder.read(file_name, limit)
