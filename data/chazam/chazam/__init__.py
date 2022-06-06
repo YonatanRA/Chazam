@@ -23,6 +23,7 @@ from chazam.config.settings import (DEFAULT_FS, DEFAULT_OVERLAP_RATIO,
 from chazam.logic.fingerprint import fingerprint
 
 
+
 class Chazam:
     def __init__(self, config: dict = SQL_CONFIG):
         

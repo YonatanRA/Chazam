@@ -31,7 +31,5 @@ if __name__ == '__main__':
         packages=find_packages(),
         platforms=['Unix'],
         install_requires=parse_requirements('requirements.txt'),
-        
+
     )
-
-
