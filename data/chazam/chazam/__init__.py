@@ -42,7 +42,7 @@ class Chazam:
 
     def __load_fingerprinted_audio_hashes(self) -> None:
         """
-        Diccionario con los hashes de los fingerprints, para saber si una cancion ha sido procesada.
+        Conjunto con los hashes de los fingerprints, para saber si una cancion ha sido procesada.
         """
 
         # obtener canciones ya indexadas
@@ -56,37 +56,37 @@ class Chazam:
 
     def get_fingerprinted_songs(self) -> List[Dict[str, any]]:
         """
-        To pull all fingerprinted songs from the database.
+        Extrae todas las canciones fingerprinteadas de la base de datos.
 
-        :return: a list of fingerprinted audios from the database.
+        :return: una lista de canciones procesadas de la base de datos.
         """
         return self.db.get_songs()
 
     def delete_songs_by_id(self, song_ids: List[int]) -> None:
         """
-        Deletes all audios given their ids.
+        Borra las canciones por su id.
 
-        :param song_ids: song ids to delete from the database.
+        :param song_ids: ids de canciones para borrar de la base de datos.
         """
         self.db.delete_songs_by_id(song_ids)
 
-    def fingerprint_directory(self, path: str, extensions: str, nprocesses: int = None) -> None:
+    def fingerprint_directory(self, path: str, extensions: str, njobs: int = None) -> None:
         """
         Given a directory and a set of extensions it fingerprints all files that match each extension specified.
 
         :param path: path to the directory.
         :param extensions: list of file extensions to consider.
-        :param nprocesses: amount of processes to fingerprint the files within the directory.
+        :param njobs: amount of processes to fingerprint the files within the directory.
         """
         # Try to use the maximum amount of processes if not given.
         try:
-            nprocesses = nprocesses or multiprocessing.cpu_count()
+            njobs = njobs or multiprocessing.cpu_count()
         except NotImplementedError:
-            nprocesses = 1
+            njobs = 1
         else:
-            nprocesses = 1 if nprocesses <= 0 else nprocesses
+            njobs = 1 if njobs <= 0 else njobs
 
-        pool = multiprocessing.Pool(nprocesses)
+        pool = multiprocessing.Pool(njobs)
 
         filenames_to_fingerprint = []
         for filename, _ in decoder.find_files(path, extensions):
