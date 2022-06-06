@@ -24,7 +24,6 @@ class Chazam:
 
     def __init__(self, config: dict = SQL_CONFIG):
 
-
         self.config = config
 
         # inicializar base de datos
@@ -70,27 +69,26 @@ class Chazam:
         """
         self.db.delete_songs_by_id(song_ids)
 
-    def fingerprint_directory(self, path: str, extensions: str, njobs: int = None) -> None:
+    def fingerprint_directory(self, path: str, ext: List[str], n_jobs: int = None) -> None:
         """
-        Given a directory and a set of extensions it fingerprints all files that match each extension specified.
+        Realiza el fingerprint de todas las canciones en una carpeta dada las extensiones (wav, mp3...)
 
-        :param path: path to the directory.
-        :param extensions: list of file extensions to consider.
-        :param njobs: amount of processes to fingerprint the files within the directory.
+        :param path: ruta al directorio.
+        :param ext: lista de extensiones a procesar.
+        :param n_jobs: cantidad de cores a usar (multiprocessing), usa el máximo si no se asigna valor.
         """
-        # Try to use the maximum amount of processes if not given.
         try:
-            njobs = njobs or multiprocessing.cpu_count()
+            n_jobs = n_jobs or multiprocessing.cpu_count()
         except NotImplementedError:
-            njobs = 1
+            n_jobs = 1
         else:
-            njobs = 1 if njobs <= 0 else njobs
+            n_jobs = 1 if n_jobs <= 0 else n_jobs
 
-        pool = multiprocessing.Pool(njobs)
+        pool = multiprocessing.Pool(n_jobs)
 
         filenames_to_fingerprint = []
-        for filename, _ in decoder.find_files(path, extensions):
-            # don't refingerprint already fingerprinted files
+        for filename, _ in decoder.find_files(path, ext):
+            # no proceses los que ya estan
             if decoder.unique_hash(filename) in self.songhashes_set:
                 print(f'{filename} already fingerprinted, continuing...')
                 continue
