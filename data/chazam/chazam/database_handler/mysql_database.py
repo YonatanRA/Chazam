@@ -45,7 +45,7 @@ class MySQLDatabase(CommonDatabase):
     ) ENGINE=INNODB;
     """
 
-    # queries de inserción
+    # queries de inserción (ignorar duplicados)
     INSERT_FINGERPRINT = f"""
         insert ignore into `{FINGERPRINTS_TABLENAME}` (
                 `{FIELD_SONG_ID}`,

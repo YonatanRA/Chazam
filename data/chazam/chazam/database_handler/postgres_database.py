@@ -1,46 +1,48 @@
 import queue
 
 import psycopg2
-from psycopg2.extras import DictCursor
-
 from chazam.base_classes.common_database import CommonDatabase
 from chazam.config.settings import (FIELD_FILE_SHA1, FIELD_FINGERPRINTED,
                                     FIELD_HASH, FIELD_OFFSET, FIELD_SONG_ID,
                                     FIELD_SONGNAME, FIELD_TOTAL_HASHES,
                                     FINGERPRINTS_TABLENAME, SONGS_TABLENAME)
+from psycopg2.extras import DictCursor
 
 
 class PostgreSQLDatabase(CommonDatabase):
+    """
+     Manejo de base de datos PostgresQL.
+    """
     type = 'postgres'
 
-    # CREATES
+    # creación de tablas
     CREATE_SONGS_TABLE = f"""
-        CREATE TABLE IF NOT EXISTS "{SONGS_TABLENAME}" (
-            "{FIELD_SONG_ID}" SERIAL
-        ,   "{FIELD_SONGNAME}" VARCHAR(250) NOT NULL
-        ,   "{FIELD_FINGERPRINTED}" SMALLINT DEFAULT 0
-        ,   "{FIELD_FILE_SHA1}" BYTEA
-        ,   "{FIELD_TOTAL_HASHES}" INT NOT NULL DEFAULT 0
-        ,   "date_created" TIMESTAMP NOT NULL DEFAULT now()
-        ,   "date_modified" TIMESTAMP NOT NULL DEFAULT now()
-        ,   CONSTRAINT "pk_{SONGS_TABLENAME}_{FIELD_SONG_ID}" PRIMARY KEY ("{FIELD_SONG_ID}")
-        ,   CONSTRAINT "uq_{SONGS_TABLENAME}_{FIELD_SONG_ID}" UNIQUE ("{FIELD_SONG_ID}")
+        create table if not exists "{SONGS_TABLENAME}" (
+            "{FIELD_SONG_ID}" serial
+        ,   "{FIELD_SONGNAME}" varchar(250) not null
+        ,   "{FIELD_FINGERPRINTED}" smallint default 0
+        ,   "{FIELD_FILE_SHA1}" bytea
+        ,   "{FIELD_TOTAL_HASHES}" int not null default 0
+        ,   "date_created" timestamp not null default now()
+        ,   "date_modified" timestamp not null default now()
+        ,   constraint "pk_{SONGS_TABLENAME}_{FIELD_SONG_ID}" primary key ("{FIELD_SONG_ID}")
+        ,   constraint "uq_{SONGS_TABLENAME}_{FIELD_SONG_ID}" unique ("{FIELD_SONG_ID}")
         );
     """
 
     CREATE_FINGERPRINTS_TABLE = f"""
-        CREATE TABLE IF NOT EXISTS "{FINGERPRINTS_TABLENAME}" (
-            "{FIELD_HASH}" BYTEA NOT NULL
-        ,   "{FIELD_SONG_ID}" INT NOT NULL
-        ,   "{FIELD_OFFSET}" INT NOT NULL
-        ,   "date_created" TIMESTAMP NOT NULL DEFAULT now()
-        ,   "date_modified" TIMESTAMP NOT NULL DEFAULT now()
-        ,   CONSTRAINT "uq_{FINGERPRINTS_TABLENAME}" UNIQUE  ("{FIELD_SONG_ID}", "{FIELD_OFFSET}", "{FIELD_HASH}")
-        ,   CONSTRAINT "fk_{FINGERPRINTS_TABLENAME}_{FIELD_SONG_ID}" FOREIGN KEY ("{FIELD_SONG_ID}")
-                REFERENCES "{SONGS_TABLENAME}"("{FIELD_SONG_ID}") ON DELETE CASCADE
+        create table if not exists "{FINGERPRINTS_TABLENAME}" (
+            "{FIELD_HASH}" bytea not null
+        ,   "{FIELD_SONG_ID}" INT not null
+        ,   "{FIELD_OFFSET}" INT not null
+        ,   "date_created" timestamp not null default now()
+        ,   "date_modified" timestamp not null default now()
+        ,   constraint "uq_{FINGERPRINTS_TABLENAME}" unique  ("{FIELD_SONG_ID}", "{FIELD_OFFSET}", "{FIELD_HASH}")
+        ,   constraint "fk_{FINGERPRINTS_TABLENAME}_{FIELD_SONG_ID}" foreign key ("{FIELD_SONG_ID}")
+                references "{SONGS_TABLENAME}"("{FIELD_SONG_ID}") on delete cascade
         );
 
-        CREATE INDEX IF NOT EXISTS "ix_{FINGERPRINTS_TABLENAME}_{FIELD_HASH}" ON "{FINGERPRINTS_TABLENAME}"
+        create index if not exists "ix_{FINGERPRINTS_TABLENAME}_{FIELD_HASH}" on "{FINGERPRINTS_TABLENAME}"
         USING hash ("{FIELD_HASH}");
     """
 
@@ -49,7 +51,7 @@ class PostgreSQLDatabase(CommonDatabase):
         USING hash ("{FIELD_HASH}");
     """
 
-    # INSERTS (IGNORES DUPLICATES)
+    # queries de inserción (ignorar duplicados)
     INSERT_FINGERPRINT = f"""
         INSERT INTO "{FINGERPRINTS_TABLENAME}" (
                 "{FIELD_SONG_ID}"
@@ -167,6 +169,7 @@ def cursor_factory(**factory_options):
     def cursor(**options):
         options.update(factory_options)
         return Cursor(**options)
+
     return cursor
 
 
@@ -178,6 +181,7 @@ class Cursor(object):
         cur.execute(query)
         ...
     '''
+
     def __init__(self, dictionary=False, **options):
         super().__init__()
 
