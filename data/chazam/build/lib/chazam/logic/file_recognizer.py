@@ -10,7 +10,7 @@ class FileRecognizer(BaseRecognizer):
     def __init__(self, chazam):
         super().__init__(chazam)
 
-    def recognize_file(self, filename: str) -> Dict[str, any]:
+    def recognize(self, filename: str) -> Dict[str, any]:
         channels, self.Fs, _ = decoder.read(filename, self.chazam.limit)
 
         t = time()
@@ -26,6 +26,3 @@ class FileRecognizer(BaseRecognizer):
         }
 
         return results
-
-    def recognize(self, filename: str) -> Dict[str, any]:
-        return self.recognize_file(filename)

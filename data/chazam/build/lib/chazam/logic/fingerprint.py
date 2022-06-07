@@ -55,72 +55,68 @@ def fingerprint(channel: List[int],
 def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN) \
         -> np.array(Tuple[List[int], List[int]]):
     """
-    Extract maximum peaks from the spectrogram matrix (arr).
+    Extrae los picos máximos del espectrograma (matriz, arr).
 
-    :param arr: matrix representing the spectrogram.
-    :param amp_min: minimum amplitude in spectrogram in order to be considered a peak.
-    :return: a list composed by a list of frequencies and times.
+    :param arr: representación matricial del espectrograma.
+    :param amp_min: mínima amplitud en el espectrograma para ser considerado pico.
+
+    :return: una lista de tuplas con frecuencia y tiempo de cada pico máximo.
     """
-    # Original code from the repo is using a morphology mask that does not consider diagonal elements
-    # as neighbors (basically a diamond figure) and then applies a dilation over it, so what I'm proposing
-    # is to change from the current diamond figure to a just a normal square one:
+    # El código original usa una máscara que no considera elementos diagonales como vecinos,
+    # una figura en diamante, y luego aplica la dilatación. Se propone una figura en cuadrado:
     #       F   T   F           T   T   T
     #       T   T   T   ==>     T   T   T
     #       F   T   F           T   T   T
-    # In my local tests time performance of the square mask was ~3 times faster
-    # respect to the diamond one, without hurting accuracy of the predictions.
-    # I've made now the mask shape configurable in order to allow both ways of find maximum peaks.
-    # That being said, we generate the mask by using the following function
+    # Esta aproximación mejora la velocidad en un 3X sin afectar al acierto.
+    # Se genera la mascara con la siguiente función de scipy:
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.generate_binary_structure.html
-    struct = generate_binary_structure(2, CONNECTIVITY_MASK)
+    mask = generate_binary_structure(2, CONNECTIVITY_MASK)
 
-    #  And then we apply dilation using the following function
+    #  Y se aplica la dilatación con la siguiente función de scipy:
     #  http://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.iterate_structure.html
-    #  Take into account that if PEAK_NEIGHBORHOOD_SIZE is 2 you can avoid the use of the scipy functions and just
-    #  change it by the following code:
-    #  neighborhood = np.ones((PEAK_NEIGHBORHOOD_SIZE * 2 + 1, PEAK_NEIGHBORHOOD_SIZE * 2 + 1), dtype=bool)
-    neighborhood = iterate_structure(struct, PEAK_NEIGHBORHOOD_SIZE)
+    #  Si PEAK_NEIGHBORHOOD_SIZE = 2 se puede escribir:
+    #  filter_ = np.ones((PEAK_NEIGHBORHOOD_SIZE * 2 + 1, PEAK_NEIGHBORHOOD_SIZE * 2 + 1), dtype=bool)
+    filter_ = iterate_structure(mask, PEAK_NEIGHBORHOOD_SIZE)
 
-    # find local maxima using our filter mask
-    local_max = maximum_filter(arr, footprint=neighborhood) == arr
+    # encuentra el máximo local usando la máscara.
+    local_max = maximum_filter(arr, footprint=filter_) == arr
 
-    # Applying erosion, the dejavu documentation does not talk about this step.
+    # aplica erosion, elimina el suelo.
     background = (arr == 0)
-    eroded_background = binary_erosion(background, structure=neighborhood, border_value=1)
+    eroded_background = binary_erosion(background, structure=filter_, border_value=1)
 
-    # Boolean mask of arr2D with True at peaks (applying XOR on both matrices).
+    # máscara booleana de arr con True en los picos (aplica XOR en ambas matrices).
     detected_peaks = local_max != eroded_background
 
-    # extract peaks
+    # extrae picos
     amps = arr[detected_peaks]
-    freqs, times = np.where(detected_peaks)
+    freq, times = np.where(detected_peaks)
 
-    # filter peaks
+    # aplana el array y saca los indices para frecuencia y tiempo
     amps = amps.flatten()
 
-    # get indices for frequency and time
     filter_idxs = np.where(amps > amp_min)
 
-    freqs_filter = freqs[filter_idxs]
+    freq_filter = freq[filter_idxs]
     times_filter = times[filter_idxs]
 
-    return list(zip(freqs_filter, times_filter))
+    return list(zip(freq_filter, times_filter))
 
 
-def hashing(peaks: List[Tuple[int, int]], distance: int = 15) -> List[Tuple[str, int]]:
+def hashing(peaks: List[Tuple[int, int]], distance: int = DEFAULT_FAN_VALUE) -> List[Tuple[str, int]]:
     """
-    Hash list structure:
+    Aplica el fingerprinting y la función hash a los picos resultantes (máximos locales).
+    Estructura del hash:
        sha1_hash[0:FINGERPRINT_REDUCTION]    time_offset
         [(e05b341a9b77a51fd26, 32), ... ]
 
-    :param peaks: list of peak frequencies and times.
-    :param distance: degree to which a fingerprint can be paired with its neighbors.
-    :return: a list of hashes with their corresponding offsets.
+    :param peaks: lista de picos (frecuencia, tiempo).
+    :param distance: distancia para que sea considerado un pico en el fingerprint.
+
+    :return: una lista de hashes con sus offsets (tiempo donde empieza el fingerprint).
     """
-    # frequencies are in the first position of the tuples
-    idx_freq = 0
-    # times are in the second position of the tuples
-    idx_time = 1
+    idx_freq = 0  # las frecuencias primero en la tupla...
+    idx_time = 1  # ...y el tiempo después, los indices.
 
     if PEAK_SORT:
         peaks.sort(key=itemgetter(1))
