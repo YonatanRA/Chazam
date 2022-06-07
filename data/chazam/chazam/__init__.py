@@ -95,7 +95,7 @@ class Chazam:
 
             files_to_fingerprint.append(file)
 
-        # Prepare _fingerprint_worker input
+        # Preparar entrada para _fingerprint_helper
         worker_input = list(zip(files_to_fingerprint, [self.limit] * len(files_to_fingerprint)))
 
         # Send off our tasks
