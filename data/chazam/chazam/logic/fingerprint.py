@@ -58,35 +58,32 @@ def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN) \
     Extrae los picos máximos del espectrograma (matriz, arr).
 
     :param arr: representación matricial del espectrograma.
-    :param amp_min: minimum amplitude in spectrogram in order to be considered a peak.
-    :return: a list composed by a list of frequencies and times.
+    :param amp_min: mínima amplitud en el espectrograma para ser considerado pico.
+
+    :return: una lista de tuplas con frecuencia y tiempo de cada pico máximo.
     """
-    # Original code from the repo is using a morphology mask that does not consider diagonal elements
-    # as neighbors (basically a diamond figure) and then applies a dilation over it, so what I'm proposing
-    # is to change from the current diamond figure to a just a normal square one:
+    # El código original usa una máscara que no considera elementos diagonales como vecinos,
+    # una figura en diamante, y luego aplica la dilatación. Se propone una figura en cuadrado:
     #       F   T   F           T   T   T
     #       T   T   T   ==>     T   T   T
     #       F   T   F           T   T   T
-    # In my local tests time performance of the square mask was ~3 times faster
-    # respect to the diamond one, without hurting accuracy of the predictions.
-    # I've made now the mask shape configurable in order to allow both ways of find maximum peaks.
-    # That being said, we generate the mask by using the following function
+    # Esta aproximación mejora la velocidad en un 3X sin afectar al acierto.
+    # Se genera la mascara con la siguiente función de scipy:
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.generate_binary_structure.html
-    struct = generate_binary_structure(2, CONNECTIVITY_MASK)
+    mask = generate_binary_structure(2, CONNECTIVITY_MASK)
 
-    #  And then we apply dilation using the following function
+    #  Y se aplica la dilatación con la siguiente función de scipy:
     #  http://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.iterate_structure.html
-    #  Take into account that if PEAK_NEIGHBORHOOD_SIZE is 2 you can avoid the use of the scipy functions and just
-    #  change it by the following code:
-    #  neighborhood = np.ones((PEAK_NEIGHBORHOOD_SIZE * 2 + 1, PEAK_NEIGHBORHOOD_SIZE * 2 + 1), dtype=bool)
-    neighborhood = iterate_structure(struct, PEAK_NEIGHBORHOOD_SIZE)
+    #  Si PEAK_NEIGHBORHOOD_SIZE = 2 se puede escribir:
+    #  filter_ = np.ones((PEAK_NEIGHBORHOOD_SIZE * 2 + 1, PEAK_NEIGHBORHOOD_SIZE * 2 + 1), dtype=bool)
+    filter_ = iterate_structure(mask, PEAK_NEIGHBORHOOD_SIZE)
 
-    # find local maxima using our filter mask
-    local_max = maximum_filter(arr, footprint=neighborhood) == arr
+    # encuentra el máximo local usando la máscara.
+    local_max = maximum_filter(arr, footprint=filter_) == arr
 
-    # Applying erosion.
+    # aplica erosion, elimina el suelo.
     background = (arr == 0)
-    eroded_background = binary_erosion(background, structure=neighborhood, border_value=1)
+    eroded_background = binary_erosion(background, structure=filter_, border_value=1)
 
     # Boolean mask of arr2D with True at peaks (applying XOR on both matrices).
     detected_peaks = local_max != eroded_background

@@ -1,11 +1,10 @@
 # chazam
 
 # chazam SQL database connection
-
-SQL_CONFIG={'database': {'host': '127.0.0.1',
-                         'user': 'root',
-                         'password': 'password', 
-                         'database': 'fingerprint'}}
+SQL_CONFIG = {'database': {'host': '127.0.0.1',
+                           'user': 'root',
+                           'password': 'password',
+                           'database': 'fingerprint'}}
 
 # chazam JSON RESPONSE
 SONG_ID = 'song_id'
@@ -59,7 +58,7 @@ FIELD_OFFSET = 'offset'
 # changes the morphology mask when looking for maximum peaks on the spectrogram matrix.
 # Possible values are: [1, 2]
 # Where 1 sets a diamond morphology which implies that diagonal elements are not considered as neighbors (this
-# is the value used in the original dejavu code).
+# is the value used in the original code).
 # And 2 sets a square mask, i.e. all elements are considered neighbors.
 CONNECTIVITY_MASK = 2
 
@@ -85,7 +84,7 @@ DEFAULT_FAN_VALUE = 25  # 15 was the original value.
 DEFAULT_AMP_MIN = 10
 
 # Number of cells around an amplitude peak in the spectrogram in order
-# for Dejavu to consider it a spectral peak. Higher values mean less
+#  to consider it a spectral peak. Higher values mean less
 # fingerprints and faster matching, but can potentially affect accuracy.
 PEAK_NEIGHBORHOOD_SIZE = 20  # 20 was the original value.
 
