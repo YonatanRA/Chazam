@@ -122,17 +122,16 @@ class Chazam:
 
     def fingerprint_file(self, file_path: str, song_name: str = None) -> None:
         """
-        Given a path to a file the method generates hashes for it and stores them in the database
-        for later be queried.
+        Realiza el fingerprint de un archivo.
 
-        :param file_path: path to the file.
-        :param song_name: song name associated to the audio file.
+        :param file_path: ruta al archivo.
+        :param song_name: nombre de la cancion.
         """
         song_name_from_path = decoder.get_audio_name_from_path(file_path)
         song_hash = decoder.unique_hash(file_path)
         song_name = song_name or song_name_from_path
 
-        # don't refingerprint already fingerprinted files
+        # no proceses los que ya estan
         if song_hash in self.songhashes_set:
             print(f'{song_name} already fingerprinted, continuing...')
         else:
