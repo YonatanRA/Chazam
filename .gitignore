@@ -11,9 +11,18 @@ __pycache__
 /*.log
 selenium/
 
+<<<<<<< HEAD
 *.wav
 /*.wav
 
+=======
+<<<<<<< HEAD
+*.wav
+/*.wav
+
+=======
+>>>>>>> b1c312b (libreria chazam)
+>>>>>>> n
 contraseñas.txt
 
 .env
@@ -21,6 +30,15 @@ contraseñas.txt
 *.h5
 *.parquet
 
+<<<<<<< HEAD
 node_modules
 .vscode
 .parcel-cache
+=======
+<<<<<<< HEAD
+node_modules
+.vscode
+.parcel-cache
+=======
+>>>>>>> b1c312b (libreria chazam)
+>>>>>>> n
