@@ -18,27 +18,27 @@ class PostgreSQLDatabase(CommonDatabase):
     # creación de tablas
     CREATE_SONGS_TABLE = f"""
         create table if not exists "{SONGS_TABLENAME}" (
-            "{FIELD_SONG_ID}" serial
-        ,   "{FIELD_SONGNAME}" varchar(250) not null
-        ,   "{FIELD_FINGERPRINTED}" smallint default 0
-        ,   "{FIELD_FILE_SHA1}" bytea
-        ,   "{FIELD_TOTAL_HASHES}" int not null default 0
-        ,   "date_created" timestamp not null default now()
-        ,   "date_modified" timestamp not null default now()
-        ,   constraint "pk_{SONGS_TABLENAME}_{FIELD_SONG_ID}" primary key ("{FIELD_SONG_ID}")
-        ,   constraint "uq_{SONGS_TABLENAME}_{FIELD_SONG_ID}" unique ("{FIELD_SONG_ID}")
+            "{FIELD_SONG_ID}" serial,
+            "{FIELD_SONGNAME}" varchar(250) not null,
+            "{FIELD_FINGERPRINTED}" smallint default 0,
+            "{FIELD_FILE_SHA1}" bytea,
+            "{FIELD_TOTAL_HASHES}" int not null default 0,
+            "date_created" timestamp not null default now(),
+            "date_modified" timestamp not null default now(),
+            constraint "pk_{SONGS_TABLENAME}_{FIELD_SONG_ID}" primary key ("{FIELD_SONG_ID}"),
+            constraint "uq_{SONGS_TABLENAME}_{FIELD_SONG_ID}" unique ("{FIELD_SONG_ID}")
         );
     """
 
     CREATE_FINGERPRINTS_TABLE = f"""
         create table if not exists "{FINGERPRINTS_TABLENAME}" (
-            "{FIELD_HASH}" bytea not null
-        ,   "{FIELD_SONG_ID}" INT not null
-        ,   "{FIELD_OFFSET}" INT not null
-        ,   "date_created" timestamp not null default now()
-        ,   "date_modified" timestamp not null default now()
-        ,   constraint "uq_{FINGERPRINTS_TABLENAME}" unique  ("{FIELD_SONG_ID}", "{FIELD_OFFSET}", "{FIELD_HASH}")
-        ,   constraint "fk_{FINGERPRINTS_TABLENAME}_{FIELD_SONG_ID}" foreign key ("{FIELD_SONG_ID}")
+            "{FIELD_HASH}" bytea not null,
+            "{FIELD_SONG_ID}" INT not null,
+            "{FIELD_OFFSET}" INT not null,
+            "date_created" timestamp not null default now(),
+            "date_modified" timestamp not null default now(),
+            constraint "uq_{FINGERPRINTS_TABLENAME}" unique  ("{FIELD_SONG_ID}", "{FIELD_OFFSET}", "{FIELD_HASH}"),
+            constraint "fk_{FINGERPRINTS_TABLENAME}_{FIELD_SONG_ID}" foreign key ("{FIELD_SONG_ID}")
                 references "{SONGS_TABLENAME}"("{FIELD_SONG_ID}") on delete cascade
         );
 
@@ -47,90 +47,90 @@ class PostgreSQLDatabase(CommonDatabase):
     """
 
     CREATE_FINGERPRINTS_TABLE_INDEX = f"""
-        CREATE INDEX "ix_{FINGERPRINTS_TABLENAME}_{FIELD_HASH}" ON "{FINGERPRINTS_TABLENAME}"
-        USING hash ("{FIELD_HASH}");
+        create index "ix_{FINGERPRINTS_TABLENAME}_{FIELD_HASH}" on "{FINGERPRINTS_TABLENAME}"
+        using hash ("{FIELD_HASH}");
     """
 
     # queries de inserción (ignorar duplicados)
     INSERT_FINGERPRINT = f"""
-        INSERT INTO "{FINGERPRINTS_TABLENAME}" (
-                "{FIELD_SONG_ID}"
-            ,   "{FIELD_HASH}"
-            ,   "{FIELD_OFFSET}")
-        VALUES (%s, decode(%s, 'hex'), %s) ON CONFLICT DO NOTHING;
+        insert into "{FINGERPRINTS_TABLENAME}" (
+                "{FIELD_SONG_ID}",
+                "{FIELD_HASH}",
+                "{FIELD_OFFSET}")
+        values (%s, decode(%s, 'hex'), %s) on conflict do nothing;
     """
 
     INSERT_SONG = f"""
-        INSERT INTO "{SONGS_TABLENAME}" ("{FIELD_SONGNAME}", "{FIELD_FILE_SHA1}","{FIELD_TOTAL_HASHES}")
-        VALUES (%s, decode(%s, 'hex'), %s)
-        RETURNING "{FIELD_SONG_ID}";
+        insert into "{SONGS_TABLENAME}" ("{FIELD_SONGNAME}", "{FIELD_FILE_SHA1}","{FIELD_TOTAL_HASHES}")
+        values (%s, decode(%s, 'hex'), %s)
+        returning "{FIELD_SONG_ID}";
     """
 
-    # SELECTS
+    # queries de selección
     SELECT = f"""
-        SELECT "{FIELD_SONG_ID}", "{FIELD_OFFSET}"
-        FROM "{FINGERPRINTS_TABLENAME}"
-        WHERE "{FIELD_HASH}" = decode(%s, 'hex');
+        select "{FIELD_SONG_ID}", "{FIELD_OFFSET}"
+        from "{FINGERPRINTS_TABLENAME}"
+        where "{FIELD_HASH}" = decode(%s, 'hex');
     """
 
     SELECT_MULTIPLE = f"""
-        SELECT upper(encode("{FIELD_HASH}", 'hex')), "{FIELD_SONG_ID}", "{FIELD_OFFSET}"
-        FROM "{FINGERPRINTS_TABLENAME}"
-        WHERE "{FIELD_HASH}" IN (%s);
+        select upper(encode("{FIELD_HASH}", 'hex')), "{FIELD_SONG_ID}", "{FIELD_OFFSET}"
+        from "{FINGERPRINTS_TABLENAME}"
+        where "{FIELD_HASH}" IN (%s);
     """
 
-    SELECT_ALL = f'SELECT "{FIELD_SONG_ID}", "{FIELD_OFFSET}" FROM "{FINGERPRINTS_TABLENAME}";'
+    SELECT_ALL = f'select "{FIELD_SONG_ID}", "{FIELD_OFFSET}" from "{FINGERPRINTS_TABLENAME}";'
 
     SELECT_SONG = f"""
-        SELECT
-            "{FIELD_SONGNAME}"
-        ,   upper(encode("{FIELD_FILE_SHA1}", 'hex')) AS "{FIELD_FILE_SHA1}"
-        ,   "{FIELD_TOTAL_HASHES}"
-        FROM "{SONGS_TABLENAME}"
-        WHERE "{FIELD_SONG_ID}" = %s;
+        select
+            "{FIELD_SONGNAME}",
+            upper(encode("{FIELD_FILE_SHA1}", 'hex')) as "{FIELD_FILE_SHA1}",
+            "{FIELD_TOTAL_HASHES}"
+        from "{SONGS_TABLENAME}"
+        where "{FIELD_SONG_ID}" = %s;
     """
 
-    SELECT_NUM_FINGERPRINTS = f'SELECT COUNT(*) AS n FROM "{FINGERPRINTS_TABLENAME}";'
+    SELECT_NUM_FINGERPRINTS = f'select count(*) as n from "{FINGERPRINTS_TABLENAME}";'
 
     SELECT_UNIQUE_SONG_IDS = f"""
-        SELECT COUNT("{FIELD_SONG_ID}") AS n
-        FROM "{SONGS_TABLENAME}"
-        WHERE "{FIELD_FINGERPRINTED}" = 1;
+        select count("{FIELD_SONG_ID}") as n
+        from "{SONGS_TABLENAME}"
+        where "{FIELD_FINGERPRINTED}" = 1;
     """
 
     SELECT_SONGS = f"""
-        SELECT
-            "{FIELD_SONG_ID}"
-        ,   "{FIELD_SONGNAME}"
-        ,   upper(encode("{FIELD_FILE_SHA1}", 'hex')) AS "{FIELD_FILE_SHA1}"
-        ,   "{FIELD_TOTAL_HASHES}"
-        ,   "date_created"
-        FROM "{SONGS_TABLENAME}"
-        WHERE "{FIELD_FINGERPRINTED}" = 1;
+        select
+            "{FIELD_SONG_ID}",
+            "{FIELD_SONGNAME}",
+            upper(encode("{FIELD_FILE_SHA1}", 'hex')) as "{FIELD_FILE_SHA1}",
+            "{FIELD_TOTAL_HASHES}",
+            "date_created"
+        from "{SONGS_TABLENAME}"
+        where "{FIELD_FINGERPRINTED}" = 1;
     """
 
-    # DROPS
-    DROP_FINGERPRINTS = F'DROP TABLE IF EXISTS "{FINGERPRINTS_TABLENAME}";'
-    DROP_SONGS = F'DROP TABLE IF EXISTS "{SONGS_TABLENAME}";'
+    # borrar tablas
+    DROP_FINGERPRINTS = F'drop table if exists "{FINGERPRINTS_TABLENAME}";'
+    DROP_SONGS = F'drop table if exists "{SONGS_TABLENAME}";'
 
-    # UPDATE
+    # actualizar registros
     UPDATE_SONG_FINGERPRINTED = f"""
-        UPDATE "{SONGS_TABLENAME}" SET
+        update "{SONGS_TABLENAME}" set
             "{FIELD_FINGERPRINTED}" = 1
         ,   "date_modified" = now()
-        WHERE "{FIELD_SONG_ID}" = %s;
+        where "{FIELD_SONG_ID}" = %s;
     """
 
-    # DELETES
+    # eliminar registros
     DELETE_UNFINGERPRINTED = f"""
-        DELETE FROM "{SONGS_TABLENAME}" WHERE "{FIELD_FINGERPRINTED}" = 0;
+        delete from "{SONGS_TABLENAME}" where "{FIELD_FINGERPRINTED}" = 0;
     """
 
     DELETE_SONGS = f"""
-        DELETE FROM "{SONGS_TABLENAME}" WHERE "{FIELD_SONG_ID}" IN (%s);
+        delete from "{SONGS_TABLENAME}" where "{FIELD_SONG_ID}" IN (%s);
     """
 
-    # IN
+    # match
     IN_MATCH = f'decode(%s, "hex")'
 
     def __init__(self, **options):
@@ -139,20 +139,19 @@ class PostgreSQLDatabase(CommonDatabase):
         self._options = options
 
     def after_fork(self) -> None:
-        # Clear the cursor cache, we don't want any stale connections from
-        # the previous process.
+        # Elimina la cache del cursor. El proceso anterior se borra.
         Cursor.clear_cache()
 
     def insert_song(self, song_name: str, file_hash: str, total_hashes: int) -> int:
-        '''
-        Inserts a song name into the database, returns the new
-        identifier of the song.
+        """
+        Inserta una canción en la base de datos y devuelve el id de la canción
 
-        :param song_name: The name of the song.
-        :param file_hash: Hash from the fingerprinted file.
-        :param total_hashes: amount of hashes to be inserted on fingerprint table.
-        :return: the inserted id.
-        '''
+        :param song_name: nombre de al canción.
+        :param file_hash: hash de el archivo fingerprinteado.
+        :param total_hashes: número total de hashes a insertar en la tabla de fingerprints.
+
+        :return: id de la canción.
+        """
         with self.cursor() as cur:
             cur.execute(self.INSERT_SONG, (song_name, file_hash, total_hashes))
             return cur.fetchone()[0]
@@ -174,13 +173,13 @@ def cursor_factory(**factory_options):
 
 
 class Cursor(object):
-    '''
-    Establishes a connection to the database and returns an open cursor.
-    # Use as context manager
+    """
+    Establece la conexión a la base de datos y devuelve un cursor abierto.
+
     with Cursor() as cur:
         cur.execute(query)
         ...
-    '''
+    """
 
     def __init__(self, dictionary=False, **options):
         super().__init__()
@@ -189,7 +188,7 @@ class Cursor(object):
 
         try:
             conn = self._cache.get_nowait()
-            # Ping the connection before using it from the cache.
+            # se hace ping antes de tirar de la cache
             conn.ping(True)
         except queue.Empty:
             conn = psycopg2.connect(**options)
@@ -208,9 +207,9 @@ class Cursor(object):
             self.cursor = self.conn.cursor()
         return self.cursor
 
-    def __exit__(self, extype, exvalue, traceback):
-        # if we had a PostgreSQL related error we try to rollback the cursor.
-        if extype is psycopg2.DatabaseError:
+    def __exit__(self, ex_type, ex_value, traceback):
+        # si hay un error con PostgresQL, trata de hacer rollback del cursor.
+        if ex_type is psycopg2.DatabaseError:
             self.cursor.rollback()
 
         self.cursor.close()
