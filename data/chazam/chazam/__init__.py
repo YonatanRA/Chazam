@@ -1,7 +1,3 @@
-<< << << < HEAD
-== == == =
-<< << << < HEAD
->> >> >> > n
 from itertools import groupby
 from time import time
 from typing import Dict, List, Tuple
