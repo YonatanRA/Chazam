@@ -1,9 +1,9 @@
 import os
 
-CONFIG = {'database': {'host': 'yonrod.mysql.pythonanywhere-services.com',
-                       'user': 'yonrod',
+CONFIG = {'database': {'host': 'user.mysql.pythonanywhere-services.com',
+                       'user': 'yon',
                        'password': 'password_1234567890',
-                       'database': 'yon$fingerprint'}}
+                       'database': 'fingerprint'}}
 
 WAV_PATH = os.path.dirname(os.path.abspath(__file__)) + '/match/audio.wav'
 
