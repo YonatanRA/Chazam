@@ -15,7 +15,7 @@ class BaseRecognizer():
 		for d in data:
 			matches.extend(self.chazam.find_matches(d, Fs=self.Fs))
 
-		return self.chazam.align_matches(matches)
+		return self.chazam.align_matches(matches,,
 
 	def recognize(self):
 		pass  # base class does nothing
