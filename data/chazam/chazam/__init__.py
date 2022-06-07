@@ -186,7 +186,7 @@ class Chazam:
         :return: una lista de diccionarios con la información de correspondencias.
         """
 
-        # count offset occurrences per song and keep only the maximum ones.
+        # cuenta las ocurrencias del offset (tiempo) por canción y quedate solo con los máximos.
         sorted_matches = sorted(matches, key=lambda m: (m[0], m[1]))
         counts = [(*key, len(list(group))) for key, group in groupby(sorted_matches, key=lambda m: (m[0], m[1]))]
         songs_matches = sorted(
@@ -195,12 +195,12 @@ class Chazam:
         )
 
         songs_result = []
-        for song_id, offset, _ in songs_matches[0:topn]:  # consider topn elements in the result
+        for song_id, offset, _ in songs_matches[0:topn]:  # considera topn elementos en el resultado
             song = self.db.get_song_by_id(song_id)
 
             song_name = song.get(SONG_NAME, None)
             song_hashes = song.get(FIELD_TOTAL_HASHES, None)
-            nseconds = round(float(offset) / DEFAULT_FS * DEFAULT_WINDOW_SIZE * DEFAULT_OVERLAP_RATIO, 5)
+            n_seconds = round(float(offset) / DEFAULT_FS * DEFAULT_WINDOW_SIZE * DEFAULT_OVERLAP_RATIO, 5)
             hashes_matched = d_hashes[song_id]
 
             song = {
@@ -209,12 +209,12 @@ class Chazam:
                 INPUT_HASHES: queried_hashes,
                 FINGERPRINTED_HASHES: song_hashes,
                 HASHES_MATCHED: hashes_matched,
-                # Percentage regarding hashes matched vs hashes from the input.
+                # Porcentaje de hashes que corresponden con respecto de los hashes de entrada.
                 INPUT_CONFIDENCE: round(hashes_matched / queried_hashes, 2),
-                # Percentage regarding hashes matched vs hashes fingerprinted in the db.
+                # Porcentaje de hashes que corresponden con respecto de los hashes en la base de datos.
                 FINGERPRINTED_CONFIDENCE: round(hashes_matched / song_hashes, 2),
                 OFFSET: offset,
-                OFFSET_SECS: nseconds,
+                OFFSET_SECS: n_seconds,
                 FIELD_FILE_SHA1: song.get(FIELD_FILE_SHA1, None).encode('utf8')
             }
 
@@ -223,6 +223,9 @@ class Chazam:
         return songs_result
 
     def recognize(self, *options, **kwoptions) -> Dict[str, any]:
+        """
+        Reconoce el archivo de audio que se le pasa.
+        """
         r = FileRecognizer(self)
         return r.recognize(*options, **kwoptions)
 

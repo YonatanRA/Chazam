@@ -158,33 +158,32 @@ class Chazam:
 
     def find_matches(self, hashes: List[Tuple[str, int]]) -> Tuple[List[Tuple[int, int]], Dict[str, int], float]:
         """
-        Finds the corresponding matches on the fingerprinted audios for the given hashes.
+        Encuentra las correspondencias de audio dados los fingerprints.
 
-        :param hashes: list of tuples for hashes and their corresponding offsets
-        :return: a tuple containing the matches found against the db, a dictionary which counts the different
-         hashes matched for each song (with the song id as key), and the time that the query took.
+        :param hashes: lista de tuplas de hashes y sus offsets.
+        :return: una tupla con las correspondencias, un diccionario con key=song_id y value=cuentas de los diferentes hashes para cada canción
+        y el tiempo de consulta a la base de datos.
 
         """
         t = time()
 
-        matches, dedup_hashes = self.db.return_matches(hashes)
+        matches, d_hashes = self.db.return_matches(hashes)  # d_hashes=deduplicate hashes
 
         query_time = time() - t
 
-        return matches, dedup_hashes, query_time
+        return matches, d_hashes, query_time
 
-    def align_matches(self, matches: List[Tuple[int, int]], dedup_hashes: Dict[str, int], queried_hashes: int,
+    def align_matches(self, matches: List[Tuple[int, int]], d_hashes: Dict[str, int], queried_hashes: int,
                       topn: int = TOPN) -> List[Dict[str, any]]:
         """
-        Finds hash matches that align in time with other matches and finds
-        consensus about which hashes are "true" signal from the audio.
+        Encuentra las correspondencias de hashes que se alinean temporalmente con otras
+        correspondencias y saca un consenso sobre que hashes representan verdaderamente la señal de audio.
 
-        :param matches: matches from the database
-        :param dedup_hashes: dictionary containing the hashes matched without duplicates for each song
-        (key is the song id).
-        :param queried_hashes: amount of hashes sent for matching against the db
-        :param topn: number of results being returned back.
-        :return: a list of dictionaries (based on topn) with match information.
+        :param matches: correspondencias desde la base de datos
+        :param d_hashes: diccionario que contiene las correspondencias en hashes para cada canción (key=song_id).
+        :param queried_hashes: cantidad de hashes enviados contra la base de datos.
+        :param topn: número de resultados que vuelven de la base de datos (por defecto 1).
+        :return: una lista de diccionarios con la información de correspondencias.
         """
 
         # count offset occurrences per song and keep only the maximum ones.
@@ -202,11 +201,11 @@ class Chazam:
             song_name = song.get(SONG_NAME, None)
             song_hashes = song.get(FIELD_TOTAL_HASHES, None)
             nseconds = round(float(offset) / DEFAULT_FS * DEFAULT_WINDOW_SIZE * DEFAULT_OVERLAP_RATIO, 5)
-            hashes_matched = dedup_hashes[song_id]
+            hashes_matched = d_hashes[song_id]
 
             song = {
                 SONG_ID: song_id,
-                SONG_NAME: song_name.encode("utf8"),
+                SONG_NAME: song_name.encode('utf8'),
                 INPUT_HASHES: queried_hashes,
                 FINGERPRINTED_HASHES: song_hashes,
                 HASHES_MATCHED: hashes_matched,
