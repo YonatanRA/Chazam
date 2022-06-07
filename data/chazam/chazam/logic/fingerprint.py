@@ -28,12 +28,13 @@ def fingerprint(channel: List[int],
     :param channel: canal para fingerprintear.
     :param Fs: frecuencia de muestreo del audio.
     :param w_size: tamaño de la ventana de la transformada rápida de Fourier.
-    :param w_ratio: ratio by which each sequential window overlaps the last and the next window.
-    :param fan_value: degree to which a fingerprint can be paired with its neighbors.
-    :param amp_min: minimum amplitude in spectrogram in order to be considered a peak.
-    :return: a list of hashes with their corresponding offsets.
+    :param w_ratio: ratio de la ventana por el cual se superpone con la anterior y siguiente ventana.
+    :param fan_value: grado por el cual un fingerprint puede ser pareado con sus vecinos.
+    :param amp_min: mínima amplitud en el espectrograma para ser considerado pico.
+
+    :return: una lista de hashes con sus correspondientes offsets.
     """
-    # FFT the signal and extract frequency components
+    # FFT de la señal y extrae las componentes de frecuencias.
     arr = mlab.specgram(
         channel,
         NFFT=w_size,
@@ -41,17 +42,18 @@ def fingerprint(channel: List[int],
         window=mlab.window_hanning,
         noverlap=int(w_size * w_ratio))[0]
 
-    # Apply log transform since specgram function returns linear array. 0s are excluded to avoid np warning.
+    # aplica transformación logarítmica de la salida porque specgram devuelve un array lineal. los 0s son excluidos para evitar warnings.
     arr = 10 * np.log10(arr, out=np.zeros_like(arr), where=(arr != 0))
 
+    # extrae los picos del espectrograma.
     local_maxima = get_spectrum_peaks(arr, amp_min=amp_min)
 
-    # return hashes
+    # devuelve hashes.
     return hashing(local_maxima, distance=fan_value)
 
 
 def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN) \
-        -> List[Tuple[List[int], List[int]]]:
+        -> np.array(Tuple[List[int], List[int]]):
     """
     Extract maximum peaks from the spectrogram matrix (arr).
 
