@@ -3,5 +3,6 @@
 # WeBuild | Chazam sound app 
 
 
+[Linkedin Yonatan](https://www.linkedin.com/in/yonatan-rodriguez/)
 
 ![Yonatan](../images/Yonatan.jpg)

@@ -42,6 +42,6 @@ Michael Jackson - Billie Jean: https://www.youtube.com/watch?v=Zi_XLOBDo_Y&ab_ch
 Daft Punk - One More Time: https://www.youtube.com/watch?v=FGBhQbmPwH8&ab_channel=DaftPunk,
 OutKast - Hey Ya!: https://www.youtube.com/watch?v=YPIPRbWuKg4&ab_channel=%E2%9C%A7riceheims%E2%9C%A6,
 ````
-
+[Linkedin German](https://www.linkedin.com/in/german-alvarez-dev/)
 
 ![German](../images/German.jpg)
