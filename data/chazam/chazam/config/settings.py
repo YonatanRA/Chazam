@@ -1,26 +1,20 @@
-# chazam
+# chazam config
 
-# chazam SQL database connection
-SQL_CONFIG = {'database': {'host': '127.0.0.1',
-                           'user': 'root',
-                           'password': 'password',
-                           'database': 'fingerprint'}}
-
-# chazam JSON RESPONSE
+# Respuesta JSON
 SONG_ID = 'song_id'
 SONG_NAME = 'song_name'
 RESULTS = 'results'
 
 HASHES_MATCHED = 'hashes_matched_in_input'
 
-# Hashes fingerprinted in the db.
+### Hashes fingerprintedeados en la base datos.
 FINGERPRINTED_HASHES = 'fingerprinted_hashes_in_db'
 # Percentage regarding hashes matched vs hashes fingerprinted in the db.
 FINGERPRINTED_CONFIDENCE = 'fingerprinted_confidence'
 
-# Hashes generated from the input.
+### Hashes generados por el archivo de entrada.
 INPUT_HASHES = 'input_total_hashes'
-# Percentage regarding hashes matched vs hashes from the input.
+### Porcentaje segun los hashes que machean contra los que entran.
 INPUT_CONFIDENCE = 'input_confidence'
 
 TOTAL_TIME = 'total_time'
@@ -30,30 +24,37 @@ ALIGN_TIME = 'align_time'
 OFFSET = 'offset'
 OFFSET_SECS = 'offset_seconds'
 
-# DATABASE CLASS INSTANCES:
+# Base de datos
+### Instancias de la clase DATABASE:
 DATABASES = {
     'mysql': ('chazam.database_handler.mysql_database', 'MySQLDatabase'),
     'postgres': ('chazam.database_handler.postgres_database', 'PostgreSQLDatabase')
 }
 
-# TABLE SONGS
+### Conexión a la base de datos de MySQL
+SQL_CONFIG = {'database': {'host': '127.0.0.1',
+                           'user': 'root',
+                           'password': 'password',
+                           'database': 'fingerprint'}}
+
+### tabla canciones
 SONGS_TABLENAME = 'songs'
 
-# SONGS FIELDS
+### columnas tabla canciones
 FIELD_SONG_ID = 'song_id'
 FIELD_SONGNAME = 'song_name'
 FIELD_FINGERPRINTED = "fingerprinted"
 FIELD_FILE_SHA1 = 'file_sha1'
 FIELD_TOTAL_HASHES = 'total_hashes'
 
-# TABLE FINGERPRINTS
+### tabla fingerprints
 FINGERPRINTS_TABLENAME = 'fingerprints'
 
-# FINGERPRINTS FIELDS
+### columnas tabla fingerprints
 FIELD_HASH = 'hash'
 FIELD_OFFSET = 'offset'
 
-# FINGERPRINTS CONFIG:
+# CONFIGURACION del FINGERPRINTING:
 # This is used as connectivity parameter for scipy.generate_binary_structure function. This parameter
 # changes the morphology mask when looking for maximum peaks on the spectrogram matrix.
 # Possible values are: [1, 2]
