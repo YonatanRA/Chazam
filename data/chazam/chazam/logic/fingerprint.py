@@ -55,9 +55,9 @@ def fingerprint(channel: List[int],
 def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN) \
         -> np.array(Tuple[List[int], List[int]]):
     """
-    Extract maximum peaks from the spectrogram matrix (arr).
+    Extrae los picos máximos del espectrograma (matriz, arr).
 
-    :param arr: matrix representing the spectrogram.
+    :param arr: representación matricial del espectrograma.
     :param amp_min: minimum amplitude in spectrogram in order to be considered a peak.
     :return: a list composed by a list of frequencies and times.
     """
@@ -84,7 +84,7 @@ def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN) \
     # find local maxima using our filter mask
     local_max = maximum_filter(arr, footprint=neighborhood) == arr
 
-    # Applying erosion, the dejavu documentation does not talk about this step.
+    # Applying erosion.
     background = (arr == 0)
     eroded_background = binary_erosion(background, structure=neighborhood, border_value=1)
 
@@ -93,7 +93,7 @@ def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN) \
 
     # extract peaks
     amps = arr[detected_peaks]
-    freqs, times = np.where(detected_peaks)
+    freq, times = np.where(detected_peaks)
 
     # filter peaks
     amps = amps.flatten()
@@ -101,10 +101,10 @@ def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN) \
     # get indices for frequency and time
     filter_idxs = np.where(amps > amp_min)
 
-    freqs_filter = freqs[filter_idxs]
+    freq_filter = freq[filter_idxs]
     times_filter = times[filter_idxs]
 
-    return list(zip(freqs_filter, times_filter))
+    return list(zip(freq_filter, times_filter))
 
 
 def hashing(peaks: List[Tuple[int, int]], distance: int = 15) -> List[Tuple[str, int]]:

@@ -3,65 +3,64 @@ from operator import itemgetter
 from typing import List, Tuple
 
 import matplotlib.mlab as mlab
-import matplotlib.pyplot as plt
 import numpy as np
-from scipy.ndimage.filters import maximum_filter
-from scipy.ndimage.morphology import (binary_erosion,
-                                      generate_binary_structure,
-                                      iterate_structure)
-
 from chazam.config.settings import (CONNECTIVITY_MASK, DEFAULT_AMP_MIN,
                                     DEFAULT_FAN_VALUE, DEFAULT_FS,
                                     DEFAULT_OVERLAP_RATIO, DEFAULT_WINDOW_SIZE,
                                     FINGERPRINT_REDUCTION, MAX_HASH_TIME_DELTA,
                                     MIN_HASH_TIME_DELTA,
                                     PEAK_NEIGHBORHOOD_SIZE, PEAK_SORT)
+from scipy.ndimage.filters import maximum_filter
+from scipy.ndimage.morphology import (binary_erosion,
+                                      generate_binary_structure,
+                                      iterate_structure)
 
 
 def fingerprint(channel: List[int],
                 Fs: int = DEFAULT_FS,
-                wsize: int = DEFAULT_WINDOW_SIZE,
-                wratio: float = DEFAULT_OVERLAP_RATIO,
+                w_size: int = DEFAULT_WINDOW_SIZE,
+                w_ratio: float = DEFAULT_OVERLAP_RATIO,
                 fan_value: int = DEFAULT_FAN_VALUE,
                 amp_min: int = DEFAULT_AMP_MIN) -> List[Tuple[str, int]]:
-    '''
-    FFT the channel, log transform output, find local maxima, then return locally sensitive hashes.
+    """
+    Fast Fourier Transform del canal, transformación logarítmica de la salida, encuentra máximos locales y devuelve los hashes.
 
-    :param channel: channel samples to fingerprint.
-    :param Fs: audio sampling rate.
-    :param wsize: FFT windows size.
-    :param wratio: ratio by which each sequential window overlaps the last and the next window.
-    :param fan_value: degree to which a fingerprint can be paired with its neighbors.
-    :param amp_min: minimum amplitude in spectrogram in order to be considered a peak.
-    :return: a list of hashes with their corresponding offsets.
-    '''
-    # FFT the signal and extract frequency components
+    :param channel: canal para fingerprintear.
+    :param Fs: frecuencia de muestreo del audio.
+    :param w_size: tamaño de la ventana de la transformada rápida de Fourier.
+    :param w_ratio: ratio de la ventana por el cual se superpone con la anterior y siguiente ventana.
+    :param fan_value: grado por el cual un fingerprint puede ser pareado con sus vecinos.
+    :param amp_min: mínima amplitud en el espectrograma para ser considerado pico.
+
+    :return: una lista de hashes con sus correspondientes offsets.
+    """
+    # FFT de la señal y extrae las componentes de frecuencias.
     arr = mlab.specgram(
-                        channel,
-                        NFFT=wsize,
-                        Fs=Fs,
-                        window=mlab.window_hanning,
-                        noverlap=int(wsize * wratio))[0]
+        channel,
+        NFFT=w_size,
+        Fs=Fs,
+        window=mlab.window_hanning,
+        noverlap=int(w_size * w_ratio))[0]
 
-    # Apply log transform since specgram function returns linear array. 0s are excluded to avoid np warning.
+    # aplica transformación logarítmica de la salida porque specgram devuelve un array lineal. los 0s son excluidos para evitar warnings.
     arr = 10 * np.log10(arr, out=np.zeros_like(arr), where=(arr != 0))
 
+    # extrae los picos del espectrograma.
     local_maxima = get_spectrum_peaks(arr, amp_min=amp_min)
 
-    # return hashes
+    # devuelve hashes.
     return hashing(local_maxima, distance=fan_value)
 
 
-def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN)\
-        -> List[Tuple[List[int], List[int]]]:
-    '''
-    Extract maximum peaks from the spectogram matrix (arr).
+def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN) \
+        -> np.array(Tuple[List[int], List[int]]):
+    """
+    Extract maximum peaks from the spectrogram matrix (arr).
 
-    :param arr2D: matrix representing the spectogram.
-    :param plot: for plotting the results.
+    :param arr: matrix representing the spectrogram.
     :param amp_min: minimum amplitude in spectrogram in order to be considered a peak.
     :return: a list composed by a list of frequencies and times.
-    '''
+    """
     # Original code from the repo is using a morphology mask that does not consider diagonal elements
     # as neighbors (basically a diamond figure) and then applies a dilation over it, so what I'm proposing
     # is to change from the current diamond figure to a just a normal square one:
@@ -109,7 +108,7 @@ def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN)\
 
 
 def hashing(peaks: List[Tuple[int, int]], distance: int = 15) -> List[Tuple[str, int]]:
-    '''
+    """
     Hash list structure:
        sha1_hash[0:FINGERPRINT_REDUCTION]    time_offset
         [(e05b341a9b77a51fd26, 32), ... ]
@@ -117,7 +116,7 @@ def hashing(peaks: List[Tuple[int, int]], distance: int = 15) -> List[Tuple[str,
     :param peaks: list of peak frequencies and times.
     :param distance: degree to which a fingerprint can be paired with its neighbors.
     :return: a list of hashes with their corresponding offsets.
-    '''
+    """
     # frequencies are in the first position of the tuples
     idx_freq = 0
     # times are in the second position of the tuples
