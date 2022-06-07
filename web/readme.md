@@ -44,4 +44,4 @@ OutKast - Hey Ya!: https://www.youtube.com/watch?v=YPIPRbWuKg4&ab_channel=%E2%9C
 ````
 
 
-![German](../images/German.jpg) -->
+![German](../images/German.jpg)
