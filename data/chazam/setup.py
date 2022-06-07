@@ -1,5 +1,6 @@
 from setuptools import find_packages, setup
 
+# Gracias a https://github.com/tuxdna
 
 def parse_requirements(requirements):
     # carga el archivo requirements.txt
@@ -21,8 +22,8 @@ if __name__ == '__main__':
         version='0.1.2',
         description='Chazam: Audio Fingerprinting in Python',
         long_description='',
-        author='',
-        author_email='',
+        author='Yona',
+        author_email='yonatan.rod.alv@gmail.com',
         maintainer='',
         maintainer_email='',
         url='',
