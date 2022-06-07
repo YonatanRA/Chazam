@@ -3,6 +3,8 @@
 # WeBuild | Chazam sound app 
 
 
+Gracias a https://github.com/tuxdna
+
 [Linkedin Yonatan](https://www.linkedin.com/in/yonatan-rodriguez/)
 
 ![Yonatan](../images/Yonatan.jpg)
