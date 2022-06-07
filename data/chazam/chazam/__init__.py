@@ -147,8 +147,8 @@ class Chazam:
 
         Genera los fingerprints para cada muestra de audio.
 
-        :param samples: list of ints which represents the channel info of the given audio file.
-        :param Fs: sampling rate which defaults to {DEFAULT_FS}.
+        :param samples: lista de enteros que representan cada canal del audio.
+        :param Fs: frecuencia de muestreo, por defecto {DEFAULT_FS}.
         :return: a list of tuples for hash and its corresponding offset, together with the generation time.
         """
         t = time()
