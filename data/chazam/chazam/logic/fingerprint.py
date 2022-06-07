@@ -85,17 +85,16 @@ def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN) \
     background = (arr == 0)
     eroded_background = binary_erosion(background, structure=filter_, border_value=1)
 
-    # Boolean mask of arr2D with True at peaks (applying XOR on both matrices).
+    # máscara booleana de arr con True en los picos (aplica XOR en ambas matrices).
     detected_peaks = local_max != eroded_background
 
-    # extract peaks
+    # extrae picos
     amps = arr[detected_peaks]
     freq, times = np.where(detected_peaks)
 
-    # filter peaks
+    # aplana el array y saca los indices para frecuencia y tiempo
     amps = amps.flatten()
 
-    # get indices for frequency and time
     filter_idxs = np.where(amps > amp_min)
 
     freq_filter = freq[filter_idxs]
@@ -104,20 +103,20 @@ def get_spectrum_peaks(arr: np.array, amp_min: int = DEFAULT_AMP_MIN) \
     return list(zip(freq_filter, times_filter))
 
 
-def hashing(peaks: List[Tuple[int, int]], distance: int = 15) -> List[Tuple[str, int]]:
+def hashing(peaks: List[Tuple[int, int]], distance: int = DEFAULT_FAN_VALUE) -> List[Tuple[str, int]]:
     """
-    Hash list structure:
+    Aplica el fingerprinting y la función hash a los picos resultantes (máximos locales).
+    Estructura del hash:
        sha1_hash[0:FINGERPRINT_REDUCTION]    time_offset
         [(e05b341a9b77a51fd26, 32), ... ]
 
-    :param peaks: list of peak frequencies and times.
-    :param distance: degree to which a fingerprint can be paired with its neighbors.
-    :return: a list of hashes with their corresponding offsets.
+    :param peaks: lista de picos (frecuencia, tiempo).
+    :param distance: distancia para que sea considerado un pico en el fingerprint.
+
+    :return: una lista de hashes con sus offsets (tiempo donde empieza el fingerprint).
     """
-    # frequencies are in the first position of the tuples
-    idx_freq = 0
-    # times are in the second position of the tuples
-    idx_time = 1
+    idx_freq = 0  # las frecuencias primero en la tupla...
+    idx_time = 1  # ...y el tiempo después, los indices.
 
     if PEAK_SORT:
         peaks.sort(key=itemgetter(1))
