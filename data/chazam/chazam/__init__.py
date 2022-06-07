@@ -142,14 +142,15 @@ class Chazam:
             self.db.set_song_fingerprinted(sid)
             self.__load_fingerprinted_audio_hashes()
 
-    def generate_fingerprints(self, samples: List[int], Fs=DEFAULT_FS) -> Tuple[List[Tuple[str, int]], float]:
+    @staticmethod
+    def generate_fingerprints(samples: List[int], Fs=DEFAULT_FS) -> Tuple[List[Tuple[str, int]], float]:
         f"""
 
         Genera los fingerprints para cada muestra de audio.
 
         :param samples: lista de enteros que representan cada canal del audio.
         :param Fs: frecuencia de muestreo, por defecto {DEFAULT_FS}.
-        :return: a list of tuples for hash and its corresponding offset, together with the generation time.
+        :return: lista de tuplas de hash y el correspondiente offset (tiempo), junto con el tiempo de generación.
         """
         t = time()
 
