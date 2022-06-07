@@ -11,6 +11,9 @@ En este repositorio encontrarás la aplicación de reconocimiento de audio para 
 
 Puedes descargarte los códigos desarrollados clonando el repositorio o, si no tienes conocimientos de Git, haciendo click sobre el botón superior derecho `Code` y seleccionando la descarga en formato .zip
 
+## Ejecución
+Puedes ejecutar la aplicación abriendo el archivo `index.html` contenido carpeta `web` en tu navegador Chrome.
+
 ## Reconocimiento
 Puedes elegir cualquiera de las siguientes canciones:
 
