@@ -97,11 +97,9 @@ class Chazam:
 
         # Preparar entrada para _fingerprint_helper
         worker_input = list(zip(files_to_fingerprint, [self.limit] * len(files_to_fingerprint)))
-
-        # Send off our tasks
         iterator = pool.imap_unordered(Chazam._fingerprint_helper, worker_input)
 
-        # Loop till we have all of them
+        # bucle hasta tenerlos todos
         while True:
             try:
                 song_name, hashes, file_hash = next(iterator)
@@ -111,7 +109,6 @@ class Chazam:
                 break
             except Exception:
                 print('Failed fingerprinting')
-                # Print traceback because we can't reraise it here
                 traceback.print_exc(file=sys.stdout)
             else:
                 sid = self.db.insert_song(song_name, file_hash, len(hashes))
