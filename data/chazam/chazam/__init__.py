@@ -225,6 +225,8 @@ class Chazam:
     def recognize(self, *options, **kwoptions) -> Dict[str, any]:
         """
         Reconoce el archivo de audio que se le pasa.
+
+        :return: diccionario con los resultados
         """
         r = FileRecognizer(self)
         return r.recognize(*options, **kwoptions)
