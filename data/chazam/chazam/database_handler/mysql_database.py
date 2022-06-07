@@ -131,13 +131,13 @@ class MySQLDatabase(CommonDatabase):
 
     def insert_song(self, song_name: str, file_hash: str, total_hashes: int) -> int:
         """
-        Inserts a song name into the database, returns the new
-        identifier of the song.
+        Inserta una canción en la base de datos y devuelve el id de la canción
 
-        :param song_name: The name of the song.
-        :param file_hash: Hash from the fingerprinted file.
-        :param total_hashes: amount of hashes to be inserted on fingerprint table.
-        :return: the inserted id.
+        :param song_name: nombre de al canción.
+        :param file_hash: hash de el archivo fingerprinteado.
+        :param total_hashes: número total de hashes a insertar en la tabla de fingerprints.
+
+        :return: id de la canción.
         """
         with self.cursor() as cur:
             cur.execute(self.INSERT_SONG, (song_name, file_hash, total_hashes))
@@ -161,8 +161,8 @@ def cursor_factory(**factory_options):
 
 class Cursor(object):
     """
-    Establishes a connection to the database and returns an open cursor.
-    # Use as context manager
+    Establece la conexión a la base de datos y devuelve un cursor abierto.
+
     with Cursor() as cur:
         cur.execute(query)
         ...
@@ -175,7 +175,7 @@ class Cursor(object):
 
         try:
             conn = self._cache.get_nowait()
-            # Ping the connection before using it from the cache.
+            # se hace ping antes de tirar de la cache
             conn.ping(True)
         except queue.Empty:
             conn = mysql.connector.connect(**options)
@@ -191,15 +191,15 @@ class Cursor(object):
         self.cursor = self.conn.cursor(dictionary=self.dictionary)
         return self.cursor
 
-    def __exit__(self, extype, exvalue, traceback):
-        # if we had a MySQL related error we try to rollback the cursor.
-        if extype is DatabaseError:
+    def __exit__(self, ex_type, ex_value, traceback):
+        # si hay un error con MySQL, trata de hacer rollback del cursor.
+        if ex_type is DatabaseError:
             self.cursor.rollback()
 
         self.cursor.close()
         self.conn.commit()
 
-        # Put it back on the queue
+        # poner en cola
         try:
             self._cache.put_nowait(self.conn)
         except queue.Full:
