@@ -55,55 +55,47 @@ FIELD_HASH = 'hash'
 FIELD_OFFSET = 'offset'
 
 # CONFIGURACION del FINGERPRINTING:
-# This is used as connectivity parameter for scipy.generate_binary_structure function. This parameter
-# changes the morphology mask when looking for maximum peaks on the spectrogram matrix.
-# Possible values are: [1, 2]
-# Where 1 sets a diamond morphology which implies that diagonal elements are not considered as neighbors (this
-# is the value used in the original code).
-# And 2 sets a square mask, i.e. all elements are considered neighbors.
+# En realidad es parámetro para la función scipy.generate_binary_structure.
+# Este parámetro cambia la forma de la máscara usada para extraer los máximos locales del espectrograma.
+# Valores posibles son 1 o 2.
+# 1 implica usar la forma de diamante en la máscara, elementos de la diagonal no son considerados vecinos.
+# 2 implica usar la forma cuadrada en la máscara, elementos de la diagonal son considerados vecinos.
 CONNECTIVITY_MASK = 2
 
-# Sampling rate, related to the Nyquist conditions, which affects
-# the range frequencies we can detect.
+# Frecuencia de muestreo del audio
 DEFAULT_FS = 48000
 
-# Size of the FFT window, affects frequency granularity
+# Tamaño de la ventana para FFT, afecta a la granularidad
 DEFAULT_WINDOW_SIZE = 12000
 
-# Ratio by which each sequential window overlaps the last and the
-# next window. Higher overlap will allow a higher granularity of offset
-# matching, but potentially more fingerprints.
-DEFAULT_OVERLAP_RATIO = 0.9  # default 0.5
+# Ratio de superposición entre ventanas siguientes de la FFT.
+# Subir este valor aumentará la granularidad del offset(mejor reconocimiento en el tiempo), pero muchos más fingerprints
+DEFAULT_OVERLAP_RATIO = 0.9  # valor por defecto 0.5
 
-# Degree to which a fingerprint can be paired with its neighbors. Higher values will
-# cause more fingerprints, but potentially better accuracy.
-DEFAULT_FAN_VALUE = 25  # 15 was the original value.
+# Grado por el cual un fingerprint puede ser pareado con sus vecinos.
+# Aumentar este valor genera más fingerprints, pero mejor acierto.
+DEFAULT_FAN_VALUE = 25  # valor por defecto 15
 
-# Minimum amplitude in spectrogram in order to be considered a peak.
-# This can be raised to reduce number of fingerprints, but can negatively
-# affect accuracy.
-DEFAULT_AMP_MIN = 10
+# Mínima amplitud en el espectrograma para ser considerado pico.
+# Aumentar este valor disminuye el número de fingerprints, pero peor acierto.
+DEFAULT_AMP_MIN = 10  # valor por defecto 10
 
-# Number of cells around an amplitude peak in the spectrogram in order
-#  to consider it a spectral peak. Higher values mean less
-# fingerprints and faster matching, but can potentially affect accuracy.
-PEAK_NEIGHBORHOOD_SIZE = 20  # 20 was the original value.
+# Número de celdas alrededor para considerar un pico.
+# Aumentar este valor disminuye el número de fingerprints, pero peor acierto.
+PEAK_NEIGHBORHOOD_SIZE = 20  # valor por defecto 20
 
-# Thresholds on how close or far fingerprints can be in time in order
-# to be paired as a fingerprint. If your max is too low, higher values of
-# DEFAULT_FAN_VALUE may not perform as expected.
-MIN_HASH_TIME_DELTA = 0
-MAX_HASH_TIME_DELTA = 200
+# Umbrales temporales de cuanto de cerca en el tiempo esta para ser parte del fingerprint.
+# Si el máximo es demasiado bajo, valores más altos de  DEFAULT_FAN_VALUE pueden no funcionar como se espera.
+MIN_HASH_TIME_DELTA = 0  # valor por defecto 0
+MAX_HASH_TIME_DELTA = 200  # valor por defecto 200
 
-# If True, will sort peaks temporally for fingerprinting;
-# not sorting will cut down number of fingerprints, but potentially
-# affect performance.
-PEAK_SORT = True
+# True ordena temporalmente los fingerprints.
+# No ordenarlos reduce la performance.
+PEAK_SORT = True  # valor por defecto True
 
-# Number of bits to grab from the front of the SHA1 hash in the
-# fingerprint calculation. The more you grab, the more memory storage,
-# with potentially lesser collisions of matches.
-FINGERPRINT_REDUCTION = 20
+# Número de bits para hash SHA1 hash en el cálculo del fingerprint calculation.
+# Cuanto más alto más memoria de almacenamiento se usa, pero menos coincidencias.
+FINGERPRINT_REDUCTION = 20  # valor por defecto 20
 
-# Number of results being returned for file recognition
-TOPN = 1
+# Número de resultados entregados por el reconocedor, canciones que coinciden por orden de confianza.
+TOPN = 1  # valor por defecto 1
