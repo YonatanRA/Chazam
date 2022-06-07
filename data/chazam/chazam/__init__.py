@@ -1,3 +1,7 @@
+import multiprocessing
+import os
+import sys
+import traceback
 from itertools import groupby
 from time import time
 from typing import Dict, List, Tuple
@@ -23,8 +27,8 @@ class Chazam:
         self.config = config
 
         # inicializar base de datos
-        db_cls = get_database(config.get('database_type', 'mysql').lower())
-        self.db = db_cls(**config.get('database', {}))
+        db_cls = get_database(self.config.get('database_type', 'mysql').lower())
+        self.db = db_cls(**self.config.get('database', {}))
         self.db.setup()
 
         # si queremos limitar el tiempo de fingerprint en segundos, None o -1 significan la cancion entera
@@ -233,7 +237,13 @@ class Chazam:
 
     @staticmethod
     def _fingerprint_helper(arguments):
-        # Pool.imap sends arguments as tuples so we have to unpack them ourself.
+        """
+        Helper para obtener los fingerprints.
+        """
+
+        # Pool.imap envia argumentos como tuplas para desempacar.
+        file_name, limit = '', ''
+
         try:
             file_name, limit = arguments
         except ValueError:
@@ -247,6 +257,15 @@ class Chazam:
 
     @staticmethod
     def get_file_fingerprints(file_name: str, limit: int, print_output: bool = False):
+        """
+        Obtener fingerprints de un archivo.
+
+        :file_name: nombre del archivo
+        :limit: número de segundos a ser fingerprinteados.
+        :print_output: verbose, salida por terminal
+
+        :return: fingerprints, file_hash
+        """
         channels, fs, file_hash = decoder.read(file_name, limit)
         fingerprints = set()
         channel_amount = len(channels)
