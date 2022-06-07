@@ -4,4 +4,4 @@
 
 
 
-![Yonatan](../images/Yonatan.jpg)
+![Yonata](../images/Yonatan.jpg)
