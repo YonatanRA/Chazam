@@ -86,20 +86,20 @@ class Chazam:
 
         pool = multiprocessing.Pool(n_jobs)
 
-        filenames_to_fingerprint = []
-        for filename, _ in decoder.find_files(path, ext):
+        files_to_fingerprint = []
+        for file, _ in decoder.find_files(path, ext):
             # no proceses los que ya estan
-            if decoder.unique_hash(filename) in self.songhashes_set:
-                print(f'{filename} already fingerprinted, continuing...')
+            if decoder.unique_hash(file) in self.songhashes_set:
+                print(f'{file} already fingerprinted, continuing...')
                 continue
 
-            filenames_to_fingerprint.append(filename)
+            files_to_fingerprint.append(file)
 
         # Prepare _fingerprint_worker input
-        worker_input = list(zip(filenames_to_fingerprint, [self.limit] * len(filenames_to_fingerprint)))
+        worker_input = list(zip(files_to_fingerprint, [self.limit] * len(files_to_fingerprint)))
 
         # Send off our tasks
-        iterator = pool.imap_unordered(Chazam._fingerprint_worker, worker_input)
+        iterator = pool.imap_unordered(Chazam._fingerprint_helper, worker_input)
 
         # Loop till we have all of them
         while True:
@@ -139,11 +139,7 @@ class Chazam:
         if song_hash in self.songhashes_set:
             print(f'{song_name} already fingerprinted, continuing...')
         else:
-            song_name, hashes, file_hash = Chazam._fingerprint_worker(
-                file_path,
-                self.limit,
-                song_name=song_name
-            )
+            song_name, hashes, file_hash = Chazam._fingerprint_helper(file_path)
             sid = self.db.insert_song(song_name, file_hash)
 
             self.db.insert_hashes(sid, hashes)
@@ -238,7 +234,7 @@ class Chazam:
         return r.recognize(*options, **kwoptions)
 
     @staticmethod
-    def _fingerprint_worker(arguments):
+    def _fingerprint_helper(arguments):
         # Pool.imap sends arguments as tuples so we have to unpack them ourself.
         try:
             file_name, limit = arguments
