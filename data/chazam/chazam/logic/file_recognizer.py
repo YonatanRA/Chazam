@@ -8,7 +8,7 @@ from chazam.config.settings import ALIGN_TIME, FINGERPRINT_TIME, QUERY_TIME, RES
 
 class FileRecognizer(BaseRecognizer):
     """
-    Clase para reconocer un archivo.
+    Clase para reconocer desde un archivo.
     """
 
     def __init__(self, chazam):
