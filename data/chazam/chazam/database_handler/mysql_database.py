@@ -1,121 +1,123 @@
 import queue
 
 import mysql.connector
-from mysql.connector.errors import DatabaseError
-
 from chazam.base_classes.common_database import CommonDatabase
 from chazam.config.settings import (FIELD_FILE_SHA1, FIELD_FINGERPRINTED,
                                     FIELD_HASH, FIELD_OFFSET, FIELD_SONG_ID,
                                     FIELD_SONGNAME, FIELD_TOTAL_HASHES,
                                     FINGERPRINTS_TABLENAME, SONGS_TABLENAME)
+from mysql.connector.errors import DatabaseError
 
 
 class MySQLDatabase(CommonDatabase):
+    """
+    Manejo de base de datos SQL.
+    """
     type = 'mysql'
 
-    # CREATES
+    # creación de tablas
     CREATE_SONGS_TABLE = f"""
-        CREATE TABLE IF NOT EXISTS `{SONGS_TABLENAME}` (
-            `{FIELD_SONG_ID}` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT
-        ,   `{FIELD_SONGNAME}` VARCHAR(250) NOT NULL
-        ,   `{FIELD_FINGERPRINTED}` TINYINT DEFAULT 0
-        ,   `{FIELD_FILE_SHA1}` BINARY(20) NOT NULL
-        ,   `{FIELD_TOTAL_HASHES}` INT NOT NULL DEFAULT 0
-        ,   `date_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-        ,   `date_modified` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        ,   CONSTRAINT `pk_{SONGS_TABLENAME}_{FIELD_SONG_ID}` PRIMARY KEY (`{FIELD_SONG_ID}`)
-        ,   CONSTRAINT `uq_{SONGS_TABLENAME}_{FIELD_SONG_ID}` UNIQUE KEY (`{FIELD_SONG_ID}`)
+        create table if not exists `{SONGS_TABLENAME}` (
+            `{FIELD_SONG_ID}` mediumint unsigned not null auto_increment,
+            `{FIELD_SONGNAME}` varchar(250) not null,
+            `{FIELD_FINGERPRINTED}` tinyint default 0,
+            `{FIELD_FILE_SHA1}` binary(20) not null,
+            `{FIELD_TOTAL_HASHES}` int not null default 0,
+            `date_created` datetime not null default current_timestamp,
+            `date_modified` datetime not null default current_timestamp on update current_timestamp,
+            constraint `pk_{SONGS_TABLENAME}_{FIELD_SONG_ID}` primary key (`{FIELD_SONG_ID}`),
+            constraint `uq_{SONGS_TABLENAME}_{FIELD_SONG_ID}` unique key (`{FIELD_SONG_ID}`)
         ) ENGINE=INNODB;
     """
 
     CREATE_FINGERPRINTS_TABLE = f"""
-        CREATE TABLE IF NOT EXISTS `{FINGERPRINTS_TABLENAME}` (
-            `{FIELD_HASH}` BINARY(10) NOT NULL
-        ,   `{FIELD_SONG_ID}` MEDIUMINT UNSIGNED NOT NULL
-        ,   `{FIELD_OFFSET}` INT UNSIGNED NOT NULL
-        ,   `date_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-        ,   `date_modified` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        ,   INDEX `ix_{FINGERPRINTS_TABLENAME}_{FIELD_HASH}` (`{FIELD_HASH}`)
-        ,   CONSTRAINT `uq_{FINGERPRINTS_TABLENAME}_{FIELD_SONG_ID}_{FIELD_OFFSET}_{FIELD_HASH}`
-                UNIQUE KEY  (`{FIELD_SONG_ID}`, `{FIELD_OFFSET}`, `{FIELD_HASH}`)
-        ,   CONSTRAINT `fk_{FINGERPRINTS_TABLENAME}_{FIELD_SONG_ID}` FOREIGN KEY (`{FIELD_SONG_ID}`)
-                REFERENCES `{SONGS_TABLENAME}`(`{FIELD_SONG_ID}`) ON DELETE CASCADE
+        create table if not exists `{FINGERPRINTS_TABLENAME}` (
+            `{FIELD_HASH}` BINARY(10) NOT NULL,
+            `{FIELD_SONG_ID}` MEDIUMINT UNSIGNED NOT NULL,
+            `{FIELD_OFFSET}` INT UNSIGNED NOT NULL,
+            `date_created` datetime not null default current_timestamp,
+            `date_modified` datetime not null default current_timestamp on update current_timestamp,
+            index `ix_{FINGERPRINTS_TABLENAME}_{FIELD_HASH}` (`{FIELD_HASH}`),
+            constraint `uq_{FINGERPRINTS_TABLENAME}_{FIELD_SONG_ID}_{FIELD_OFFSET}_{FIELD_HASH}`
+                unique key  (`{FIELD_SONG_ID}`, `{FIELD_OFFSET}`, `{FIELD_HASH}`),
+            constraint `fk_{FINGERPRINTS_TABLENAME}_{FIELD_SONG_ID}` FOREIGN KEY (`{FIELD_SONG_ID}`)
+                references `{SONGS_TABLENAME}`(`{FIELD_SONG_ID}`) on delete cascade
     ) ENGINE=INNODB;
     """
 
-    # INSERTS (IGNORES DUPLICATES)
+    # queries de inserción
     INSERT_FINGERPRINT = f"""
-        INSERT IGNORE INTO `{FINGERPRINTS_TABLENAME}` (
-                `{FIELD_SONG_ID}`
-            ,   `{FIELD_HASH}`
-            ,   `{FIELD_OFFSET}`)
-        VALUES (%s, UNHEX(%s), %s);
+        insert ignore into `{FINGERPRINTS_TABLENAME}` (
+                `{FIELD_SONG_ID}`,
+                `{FIELD_HASH}`,
+                `{FIELD_OFFSET}`)
+        values (%s, UNHEX(%s), %s);
     """
 
     INSERT_SONG = f"""
-        INSERT INTO `{SONGS_TABLENAME}` (`{FIELD_SONGNAME}`,`{FIELD_FILE_SHA1}`,`{FIELD_TOTAL_HASHES}`)
-        VALUES (%s, UNHEX(%s), %s);
+        insert into `{SONGS_TABLENAME}` (`{FIELD_SONGNAME}`,`{FIELD_FILE_SHA1}`,`{FIELD_TOTAL_HASHES}`)
+        values (%s, UNHEX(%s), %s);
     """
 
-    # SELECTS
+    # queries de selección
     SELECT = f"""
-        SELECT `{FIELD_SONG_ID}`, `{FIELD_OFFSET}`
-        FROM `{FINGERPRINTS_TABLENAME}`
-        WHERE `{FIELD_HASH}` = UNHEX(%s);
+        select `{FIELD_SONG_ID}`, `{FIELD_OFFSET}`
+        from `{FINGERPRINTS_TABLENAME}`
+        where `{FIELD_HASH}` = UNHEX(%s);
     """
 
     SELECT_MULTIPLE = f"""
-        SELECT HEX(`{FIELD_HASH}`), `{FIELD_SONG_ID}`, `{FIELD_OFFSET}`
-        FROM `{FINGERPRINTS_TABLENAME}`
-        WHERE `{FIELD_HASH}` IN (%s);
+        select HEX(`{FIELD_HASH}`), `{FIELD_SONG_ID}`, `{FIELD_OFFSET}`
+        from `{FINGERPRINTS_TABLENAME}`
+        where `{FIELD_HASH}` in (%s);
     """
 
-    SELECT_ALL = f"SELECT `{FIELD_SONG_ID}`, `{FIELD_OFFSET}` FROM `{FINGERPRINTS_TABLENAME}`;"
+    SELECT_ALL = f"select `{FIELD_SONG_ID}`, `{FIELD_OFFSET}` from `{FINGERPRINTS_TABLENAME}`;"
 
     SELECT_SONG = f"""
-        SELECT `{FIELD_SONGNAME}`, HEX(`{FIELD_FILE_SHA1}`) AS `{FIELD_FILE_SHA1}`, `{FIELD_TOTAL_HASHES}`
-        FROM `{SONGS_TABLENAME}`
-        WHERE `{FIELD_SONG_ID}` = %s;
+        select `{FIELD_SONGNAME}`, HEX(`{FIELD_FILE_SHA1}`) as `{FIELD_FILE_SHA1}`, `{FIELD_TOTAL_HASHES}`
+        from `{SONGS_TABLENAME}`
+        where `{FIELD_SONG_ID}` = %s;
     """
 
-    SELECT_NUM_FINGERPRINTS = f"SELECT COUNT(*) AS n FROM `{FINGERPRINTS_TABLENAME}`;"
+    SELECT_NUM_FINGERPRINTS = f"select count(*) as n from `{FINGERPRINTS_TABLENAME}`;"
 
     SELECT_UNIQUE_SONG_IDS = f"""
-        SELECT COUNT(`{FIELD_SONG_ID}`) AS n
-        FROM `{SONGS_TABLENAME}`
-        WHERE `{FIELD_FINGERPRINTED}` = 1;
+        select count(`{FIELD_SONG_ID}`) as n
+        from `{SONGS_TABLENAME}`
+        where `{FIELD_FINGERPRINTED}` = 1;
     """
 
     SELECT_SONGS = f"""
-        SELECT
+        select
             `{FIELD_SONG_ID}`
         ,   `{FIELD_SONGNAME}`
-        ,   HEX(`{FIELD_FILE_SHA1}`) AS `{FIELD_FILE_SHA1}`
+        ,   HEX(`{FIELD_FILE_SHA1}`) as `{FIELD_FILE_SHA1}`
         ,   `{FIELD_TOTAL_HASHES}`
         ,   `date_created`
-        FROM `{SONGS_TABLENAME}`
-        WHERE `{FIELD_FINGERPRINTED}` = 1;
+        from `{SONGS_TABLENAME}`
+        where `{FIELD_FINGERPRINTED}` = 1;
     """
 
-    # DROPS
-    DROP_FINGERPRINTS = f"DROP TABLE IF EXISTS `{FINGERPRINTS_TABLENAME}`;"
-    DROP_SONGS = f"DROP TABLE IF EXISTS `{SONGS_TABLENAME}`;"
+    # borrar tablas
+    DROP_FINGERPRINTS = f"drop table if exists `{FINGERPRINTS_TABLENAME}`;"
+    DROP_SONGS = f"drop table if exists `{SONGS_TABLENAME}`;"
 
-    # UPDATE
+    # actualizar registros
     UPDATE_SONG_FINGERPRINTED = f"""
-        UPDATE `{SONGS_TABLENAME}` SET `{FIELD_FINGERPRINTED}` = 1 WHERE `{FIELD_SONG_ID}` = %s;
+        update `{SONGS_TABLENAME}` set `{FIELD_FINGERPRINTED}` = 1 where `{FIELD_SONG_ID}` = %s;
     """
 
-    # DELETES
+    # eliminar registros
     DELETE_UNFINGERPRINTED = f"""
-        DELETE FROM `{SONGS_TABLENAME}` WHERE `{FIELD_FINGERPRINTED}` = 0;
+        delete from `{SONGS_TABLENAME}` where `{FIELD_FINGERPRINTED}` = 0;
     """
 
     DELETE_SONGS = f"""
-        DELETE FROM `{SONGS_TABLENAME}` WHERE `{FIELD_SONG_ID}` IN (%s);
+        delete from `{SONGS_TABLENAME}` where `{FIELD_SONG_ID}` in (%s);
     """
 
-    # IN
+    # match
     IN_MATCH = f'UNHEX(%s)'
 
     def __init__(self, **options):
@@ -124,12 +126,11 @@ class MySQLDatabase(CommonDatabase):
         self._options = options
 
     def after_fork(self) -> None:
-        # Clear the cursor cache, we don't want any stale connections from
-        # the previous process.
+        # Elimina la cache del cursor. El proceso anterior se borra.
         Cursor.clear_cache()
 
     def insert_song(self, song_name: str, file_hash: str, total_hashes: int) -> int:
-        '''
+        """
         Inserts a song name into the database, returns the new
         identifier of the song.
 
@@ -137,7 +138,7 @@ class MySQLDatabase(CommonDatabase):
         :param file_hash: Hash from the fingerprinted file.
         :param total_hashes: amount of hashes to be inserted on fingerprint table.
         :return: the inserted id.
-        '''
+        """
         with self.cursor() as cur:
             cur.execute(self.INSERT_SONG, (song_name, file_hash, total_hashes))
             return cur.lastrowid
@@ -154,17 +155,19 @@ def cursor_factory(**factory_options):
     def cursor(**options):
         options.update(factory_options)
         return Cursor(**options)
+
     return cursor
 
 
 class Cursor(object):
-    '''
+    """
     Establishes a connection to the database and returns an open cursor.
     # Use as context manager
     with Cursor() as cur:
         cur.execute(query)
         ...
-    '''
+    """
+
     def __init__(self, dictionary=False, **options):
         super().__init__()
 
