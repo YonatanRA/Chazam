@@ -10,6 +10,7 @@ class FileRecognizer(BaseRecognizer):
     """
     Clase para reconocer un archivo.
     """
+
     def __init__(self, chazam):
         super().__init__(chazam)
 
