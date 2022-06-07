@@ -27,8 +27,7 @@ class Chazam:
         self.config = config
 
         # inicializar base de datos
-        db_cls = get_database(self.config.get('database_type', 'mysql').lower())
-        self.db = db_cls(**self.config.get('database', {}))
+        self.db = get_database(self.config.get('database_type', 'mysql').lower())(**self.config.get('database', {}))
         self.db.setup()
 
         # si queremos limitar el tiempo de fingerprint en segundos, None o -1 significan la cancion entera

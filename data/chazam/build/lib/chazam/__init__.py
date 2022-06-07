@@ -1,3 +1,7 @@
+import multiprocessing
+import os
+import sys
+import traceback
 from itertools import groupby
 from time import time
 from typing import Dict, List, Tuple
@@ -23,8 +27,8 @@ class Chazam:
         self.config = config
 
         # inicializar base de datos
-        db_cls = get_database(config.get('database_type', 'mysql').lower())
-        self.db = db_cls(**config.get('database', {}))
+        db_cls = get_database(self.config.get('database_type', 'mysql').lower())
+        self.db = db_cls(**self.config.get('database', {}))
         self.db.setup()
 
         # si queremos limitar el tiempo de fingerprint en segundos, None o -1 significan la cancion entera
@@ -186,7 +190,7 @@ class Chazam:
         :return: una lista de diccionarios con la información de correspondencias.
         """
 
-        # count offset occurrences per song and keep only the maximum ones.
+        # cuenta las ocurrencias del offset (tiempo) por canción y quedate solo con los máximos.
         sorted_matches = sorted(matches, key=lambda m: (m[0], m[1]))
         counts = [(*key, len(list(group))) for key, group in groupby(sorted_matches, key=lambda m: (m[0], m[1]))]
         songs_matches = sorted(
@@ -195,12 +199,12 @@ class Chazam:
         )
 
         songs_result = []
-        for song_id, offset, _ in songs_matches[0:topn]:  # consider topn elements in the result
+        for song_id, offset, _ in songs_matches[0:topn]:  # considera topn elementos en el resultado
             song = self.db.get_song_by_id(song_id)
 
             song_name = song.get(SONG_NAME, None)
             song_hashes = song.get(FIELD_TOTAL_HASHES, None)
-            nseconds = round(float(offset) / DEFAULT_FS * DEFAULT_WINDOW_SIZE * DEFAULT_OVERLAP_RATIO, 5)
+            n_seconds = round(float(offset) / DEFAULT_FS * DEFAULT_WINDOW_SIZE * DEFAULT_OVERLAP_RATIO, 5)
             hashes_matched = d_hashes[song_id]
 
             song = {
@@ -209,12 +213,12 @@ class Chazam:
                 INPUT_HASHES: queried_hashes,
                 FINGERPRINTED_HASHES: song_hashes,
                 HASHES_MATCHED: hashes_matched,
-                # Percentage regarding hashes matched vs hashes from the input.
+                # Porcentaje de hashes que corresponden con respecto de los hashes de entrada.
                 INPUT_CONFIDENCE: round(hashes_matched / queried_hashes, 2),
-                # Percentage regarding hashes matched vs hashes fingerprinted in the db.
+                # Porcentaje de hashes que corresponden con respecto de los hashes en la base de datos.
                 FINGERPRINTED_CONFIDENCE: round(hashes_matched / song_hashes, 2),
                 OFFSET: offset,
-                OFFSET_SECS: nseconds,
+                OFFSET_SECS: n_seconds,
                 FIELD_FILE_SHA1: song.get(FIELD_FILE_SHA1, None).encode('utf8')
             }
 
@@ -223,12 +227,23 @@ class Chazam:
         return songs_result
 
     def recognize(self, *options, **kwoptions) -> Dict[str, any]:
+        """
+        Reconoce el archivo de audio que se le pasa.
+
+        :return: diccionario con los resultados
+        """
         r = FileRecognizer(self)
         return r.recognize(*options, **kwoptions)
 
     @staticmethod
     def _fingerprint_helper(arguments):
-        # Pool.imap sends arguments as tuples so we have to unpack them ourself.
+        """
+        Helper para obtener los fingerprints.
+        """
+
+        # Pool.imap envia argumentos como tuplas para desempacar.
+        file_name, limit = '', ''
+
         try:
             file_name, limit = arguments
         except ValueError:
@@ -242,6 +257,15 @@ class Chazam:
 
     @staticmethod
     def get_file_fingerprints(file_name: str, limit: int, print_output: bool = False):
+        """
+        Obtener fingerprints de un archivo.
+
+        :file_name: nombre del archivo
+        :limit: número de segundos a ser fingerprinteados.
+        :print_output: verbose, salida por terminal
+
+        :return: fingerprints, file_hash
+        """
         channels, fs, file_hash = decoder.read(file_name, limit)
         fingerprints = set()
         channel_amount = len(channels)
