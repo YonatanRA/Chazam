@@ -144,7 +144,7 @@ class Chazam:
 
     def generate_fingerprints(self, samples: List[int], Fs=DEFAULT_FS) -> Tuple[List[Tuple[str, int]], float]:
         f"""
-        Generate the fingerprints for the given sample data (channel).
+        Genera the fingerprints for the given sample data (channel).
 
         :param samples: list of ints which represents the channel info of the given audio file.
         :param Fs: sampling rate which defaults to {DEFAULT_FS}.
