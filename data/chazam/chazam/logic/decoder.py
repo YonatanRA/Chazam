@@ -89,9 +89,10 @@ def read(file_name: str, limit: int = None) -> Tuple[List[List[int]], int, str]:
 
 def get_audio_name_from_path(file_path: str) -> str:
     """
-    Extracts song name from a file path.
+    Extrae el nombre de una canción de la ruta del archivo
 
-    :param file_path: path to an audio file.
-    :return: file name
+    :param file_path: ruta al archivo de audio.
+
+    :return: nombre del audio.
     """
     return os.path.splitext(os.path.basename(file_path))[0]

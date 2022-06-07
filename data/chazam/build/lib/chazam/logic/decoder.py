@@ -4,23 +4,20 @@ from hashlib import sha1
 from typing import List, Tuple
 
 import numpy as np
+from chazam.tools import wavio
 from pydub import AudioSegment
 from pydub.utils import audioop
 
-from chazam.tools import wavio
 
-
-def unique_hash(file_path: str, block_size: int = 2**20) -> str:
-    ''' Small function to generate a hash to uniquely generate
-    a file. Inspired by MD5 version here:
+def unique_hash(file_path: str, block_size: int = 2 ** 20) -> str:
+    """ Función generadora de hashes dado un archivo. Inspirado en la versión MD5:
     http://stackoverflow.com/a/1131255/712997
 
-    Works with large files.
+    :param file_path: ruta al archivo.
+    :param block_size: tamaño del bloque ha ser leído.
 
-    :param file_path: path to file.
-    :param block_size: read block size.
-    :return: a hash in an hexagesimal string form.
-    '''
+    :return: un hash en una string hexagesimal.
+    """
     s = sha1()
     with open(file_path, 'rb') as f:
         while True:
@@ -32,74 +29,69 @@ def unique_hash(file_path: str, block_size: int = 2**20) -> str:
 
 
 def find_files(path: str, extensions: List[str]) -> List[Tuple[str, str]]:
-    '''
-    Get all files that meet the specified extensions.
+    """
+    Obtener todos los archivos que corresponden con las extensiones dadas.
 
-    :param path: path to a directory with audio files.
-    :param extensions: file extensions to look for.
-    :return: a list of tuples with file name and its extension.
-    '''
-    # Allow both with '.mp3' and without 'mp3' to be used for extensions
-    extensions = [e.replace('.', '') for e in extensions]
+    :param path: ruta al directorio de archivos de audio.
+    :param extensions: extensiones de los archivos de audio a obtener.
+
+    :return: una lista de tuplas con los nombres de archivo y las extensiones.
+    """
+    extensions = [e.replace('.', '') for e in extensions]  # permite con punto o sin el para las extensiones (mp3, .mp3)
 
     results = []
-    for dirpath, dirnames, files in os.walk(path):
+    for dir_path, dir_names, files in os.walk(path):
         for extension in extensions:
             for f in fnmatch.filter(files, f'*.{extension}'):
-                p = os.path.join(dirpath, f)
+                p = os.path.join(dir_path, f)
                 results.append((p, extension))
     return results
 
 
 def read(file_name: str, limit: int = None) -> Tuple[List[List[int]], int, str]:
-    '''
-    Reads any file supported by pydub (ffmpeg) and returns the data contained
-    within. If file reading fails due to input being a 24-bit wav file,
-    wavio is used as a backup.
+    """
+    Lectura de archivos de audio con pydub (ffmpeg) y devuelve los datos que contiene.
+    Se usa wavio si el audio es wav 24-bit, como backup.
 
-    Can be optionally limited to a certain amount of seconds from the start
-    of the file by specifying the `limit` parameter. This is the amount of
-    seconds from the start of the file.
+    :param file_name: archivo a leer.
+    :param limit: número de segundos límite.
 
-    :param file_name: file to be read.
-    :param limit: number of seconds to limit.
-    :return: tuple list of (channels, sample_rate, content_file_hash).
-    '''
-    # pydub does not support 24-bit wav files, use wavio when this occurs
+    :return: tupla de listas de (canales, frecuencia de muestreo, archivo hash).
+    """
+    # pydub no soporta archivos wav 24-bit, se usa wavio cuando falla
     try:
-        audiofile = AudioSegment.from_file(file_name)
+        audio_file = AudioSegment.from_file(file_name)
 
         if limit:
-            audiofile = audiofile[:limit * 1000]
+            audio_file = audio_file[:limit * 1000]
 
-        data = np.fromstring(audiofile.raw_data, np.int16)
+        data = np.fromstring(audio_file.raw_data, np.int16)
 
         channels = []
-        for chn in range(audiofile.channels):
-            channels.append(data[chn::audiofile.channels])
+        for chn in range(audio_file.channels):
+            channels.append(data[chn::audio_file.channels])
 
-        audiofile.frame_rate
     except audioop.error:
-        _, _, audiofile = wavio.readwav(file_name)
+        _, _, audio_file = wavio.read(file_name)
 
         if limit:
-            audiofile = audiofile[:limit * 1000]
+            audio_file = audio_file[:limit * 1000]
 
-        audiofile = audiofile.T
-        audiofile = audiofile.astype(np.int16)
+        audio_file = audio_file.T
+        audio_file = audio_file.astype(np.int16)
 
         channels = []
-        for chn in audiofile:
+        for chn in audio_file:
             channels.append(chn)
 
-    return channels, audiofile.frame_rate, unique_hash(file_name)
+    return channels, audio_file.frame_rate, unique_hash(file_name)
 
 
 def get_audio_name_from_path(file_path: str) -> str:
-    '''
+    """
     Extracts song name from a file path.
 
     :param file_path: path to an audio file.
     :return: file name
-    '''
+    """
     return os.path.splitext(os.path.basename(file_path))[0]
