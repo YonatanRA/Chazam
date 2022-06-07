@@ -1,5 +1,7 @@
-# Chazam
+<img src="http://www.franbosquet.com/wp-content/uploads/ironhack_logonegro.png" width="80" style="float:right">
 
-Ironhack's Shazam Replica
+# WeBuild | Chazam sound app 
 
-![01](images/01.jpg)
+
+
+![Agostine](../images/Agostina.jpg)
