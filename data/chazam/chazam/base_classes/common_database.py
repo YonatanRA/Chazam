@@ -44,17 +44,16 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
 
     def delete_unfingerprinted_songs(self) -> None:
         """
-        Called to remove any song entries that do not have any fingerprints
-        associated with them.
+        Llamada para borrar canciones no procesadas.
         """
         with self.cursor() as cur:
             cur.execute(self.DELETE_UNFINGERPRINTED)
 
     def get_num_songs(self) -> int:
         """
-        Returns the song's count stored.
+        Cuenta el número de canciones.
 
-        :return: the amount of songs in the database.
+        :return: número de canciones en la base de datos.
         """
         with self.cursor(buffered=True) as cur:
             cur.execute(self.SELECT_UNIQUE_SONG_IDS)
@@ -64,9 +63,9 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
 
     def get_num_fingerprints(self) -> int:
         """
-        Returns the fingerprints' count stored.
+        Cuenta el número de fingerprints.
 
-        :return: the number of fingerprints in the database.
+        :return: número de fingerprints en la base de datos.
         """
         with self.cursor(buffered=True) as cur:
             cur.execute(self.SELECT_NUM_FINGERPRINTS)
@@ -76,18 +75,18 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
 
     def set_song_fingerprinted(self, song_id):
         """
-        Sets a specific song as having all fingerprints in the database.
+        Establece si una canción ha sido procesada..
 
-        :param song_id: song identifier.
+        :param song_id: id de la canción.
         """
         with self.cursor() as cur:
             cur.execute(self.UPDATE_SONG_FINGERPRINTED, (song_id,))
 
     def get_songs(self) -> List[Dict[str, str]]:
         """
-        Returns all fully fingerprinted songs in the database
+        Devuelve todas las canciones procesadas de la base de datos.
 
-        :return: a dictionary with the songs info.
+        :return: un diccionario con toda la info de las canciones.
         """
         with self.cursor(dictionary=True) as cur:
             cur.execute(self.SELECT_SONGS)
@@ -95,10 +94,10 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
 
     def get_song_by_id(self, song_id: int) -> Dict[str, str]:
         """
-        Brings the song info from the database.
+        Info de la canción.
+        :param song_id: id de la canción.
 
-        :param song_id: song identifier.
-        :return: a song by its identifier. Result must be a Dictionary.
+        :return: un diccionario con la info de la cancione.
         """
         with self.cursor(dictionary=True) as cur:
             cur.execute(self.SELECT_SONG, (song_id,))
@@ -106,11 +105,10 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
 
     def insert(self, fingerprint: str, song_id: int, offset: int):
         """
-        Inserts a single fingerprint into the database.
-
-        :param fingerprint: Part of a sha1 hash, in hexadecimal format
-        :param song_id: Song identifier this fingerprint is off
-        :param offset: The offset this fingerprint is from.
+        Inserta un solo fingerprint en la base de datos.
+        :param fingerprint: parte del hash sha1, hexadecimal
+        :param song_id: id de la canción.
+        :param offset: punto temporal de donde viene el fingerprint.
         """
         with self.cursor() as cur:
             cur.execute(self.INSERT_FINGERPRINT, (fingerprint, song_id, offset))
