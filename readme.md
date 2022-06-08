@@ -6,6 +6,14 @@
 
 En este repositorio encontrarás la aplicación de reconocimiento de audio para navegador desarrollada en el evento WeBuild @ <a href="https://www.ironhack.com/es/madrid">Ironhack Madrid</a> (2022)
 
+En la carpeta `ux` encontrarás el enlace a Figma con todas las slides que [Agostina](https://www.linkedin.com/in/agostinagb/) enseñó.
+
+En la carpeta `data` encontrarás todo el código necesario para reconocer canciones y la presentación de [Yonatan](https://www.linkedin.com/in/yonatan-rodriguez/).
+
+En la carpeta `web` encontrarás todo el código necesario para construir la aplicación web que [German](https://www.linkedin.com/in/german-alvarez-dev/) creó durante el evento.
+
+
+
 
 ## Descarga
 
