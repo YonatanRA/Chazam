@@ -1,8 +1,8 @@
 import os
 
 CONFIG = {'database': {'host': 'user.mysql.pythonanywhere-services.com',
-                       'user': 'yon',
-                       'password': 'password_1234567890',
+                       'user': 'yona',
+                       'password': 'password',
                        'database': 'fingerprint'}}
 
 WAV_PATH = os.path.dirname(os.path.abspath(__file__)) + '/match/audio.wav'
