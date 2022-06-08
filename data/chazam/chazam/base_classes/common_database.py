@@ -116,48 +116,49 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def insert_song(self, song_name: str, file_hash: str, total_hashes: int) -> int:
         """
-        Inserta a song name into the database, returns the new
-        identifier of the song.
+        Inserta una canción en la base de datos, devuelve el id de la canción insertada.
 
-        :param song_name: The name of the song.
-        :param file_hash: Hash from the fingerprinted file.
-        :param total_hashes: amount of hashes to be inserted on fingerprint table.
-        :return: the inserted id.
+        :param song_name: nombre de la canción.
+        :param file_hash: hash del archivo fingerprinteado.
+        :param total_hashes: número total de hashes insertados.
+
+        :return: id de la canción.
         """
         pass
 
     def query(self, fingerprint: str = None) -> List[Tuple]:
         """
-        Returns all matching fingerprint entries associated with
-        the given hash as parameter, if None is passed it returns all entries.
+        Devuelve todas las coincidencias de fingerprints asociados con el hash.
+        Si se pasa None devuelve todas las entradas de la base de datos.
 
-        :param fingerprint: part of a sha1 hash, in hexadecimal format
-        :return: a list of fingerprint records stored in the db.
+        :param fingerprint: parte del hash sha1, en hexadecimal
+
+        :return: una lista de los fingerprints en la base de datos.
         """
         with self.cursor() as cur:
             if fingerprint:
                 cur.execute(self.SELECT, (fingerprint,))
-            else:  # select all if no key
+            else:  # selecciona todos si es None
                 cur.execute(self.SELECT_ALL)
             return list(cur)
 
     def get_iterable_kv_pairs(self) -> List[Tuple]:
         """
-        Returns all fingerprints in the database.
+        Devuelve todos los fingerprints en la base de datos.
 
-        :return: a list containing all fingerprints stored in the db.
+        :return: una lista de todos los fingerprints guardados en la base de datos.
         """
         return self.query(None)
 
     def insert_hashes(self, song_id: int, hashes: List[Tuple[str, int]], batch_size: int = 1000) -> None:
         """
-        Insert a multitude of fingerprints.
+        Inserción multiple de fingerprints.
 
-        :param song_id: Song identifier the fingerprints belong to
-        :param hashes: A sequence of tuples in the format (hash, offset)
-            - hash: Part of a sha1 hash, in hexadecimal format
-            - offset: Offset this hash was created from/at.
-        :param batch_size: insert batches.
+        :param song_id: id de la canción
+        :param hashes: lista de tuplas con formato (hash, offset)
+            - hash: parte del hash sha1, en hexadecimal
+            - offset: tiempo donde el hash empieza.
+        :param batch_size: tamaño de los batches.
         """
         values = [(song_id, hsh, int(offset)) for hsh, offset in hashes]
 
@@ -168,19 +169,20 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
     def return_matches(self, hashes: List[Tuple[str, int]],
                        batch_size: int = 1000) -> Tuple[List[Tuple[int, int]], Dict[int, int]]:
         """
-        Searches the database for pairs of (hash, offset) values.
+        Busca en la base de datos las parejas de valores (hash, offset).
 
-        :param hashes: A sequence of tuples in the format (hash, offset)
-            - hash: Part of a sha1 hash, in hexadecimal format
-            - offset: Offset this hash was created from/at.
-        :param batch_size: number of query's batches.
-        :return: a list of (sid, offset_difference) tuples and a
-        dictionary with the amount of hashes matched (not considering
-        duplicated hashes) in each song.
-            - song id: Song identifier
+        :param hashes: lista de tuplas con formato (hash, offset)
+            - hash: parte del hash sha1, en hexadecimal
+            - offset: tiempo donde el hash empieza.
+        :param batch_size: tamaño de los batches.
+
+        :return: una lista de tuplas (sid, offset_difference) y un
+        diccionario con la cantidad de hashes que coinciden de cada canción
+        sin considerar duplicados.
+            - song id: id de la canción
             - offset_difference: (database_offset - sampled_offset)
         """
-        # Create a dictionary of hash => offset pairs for later lookups
+        # Crea un diccionario de hashes
         mapper = {}
         for hsh, offset in hashes:
             if hsh.upper() in mapper.keys():
@@ -190,38 +192,37 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
 
         values = list(mapper.keys())
 
-        # in order to count each hash only once per db offset we use the dic below
-        dedup_hashes = {}
+        d_hashes = {}  # quitar hashes duplicados
 
         results = []
         with self.cursor() as cur:
             for index in range(0, len(values), batch_size):
-                # Create our IN part of the query
+                # query
                 query = self.SELECT_MULTIPLE % ', '.join([self.IN_MATCH] * len(values[index: index + batch_size]))
 
                 cur.execute(query, values[index: index + batch_size])
 
                 for hsh, sid, offset in cur:
-                    if sid not in dedup_hashes.keys():
-                        dedup_hashes[sid] = 1
+                    if sid not in d_hashes.keys():
+                        d_hashes[sid] = 1
                     else:
-                        dedup_hashes[sid] += 1
-                    #  we now evaluate all offset for each  hash matched
+                        d_hashes[sid] += 1
+                    #  evalua todos los offset de cada hash que coincide
                     for song_sampled_offset in mapper[hsh]:
                         results.append((sid, offset - song_sampled_offset))
 
-            return results, dedup_hashes
+            return results, d_hashes
 
     def delete_songs_by_id(self, song_ids: List[int], batch_size: int = 1000) -> None:
         """
-        Given a list of song ids it deletes all songs specified and their corresponding fingerprints.
+        Dada una lista de canciones, las borra y también sus correspondientes fingerprints.
 
-        :param song_ids: song ids to be deleted from the database.
-        :param batch_size: number of query's batches.
+        :param song_ids: lista de ids de canciones.
+        :param batch_size: tamaño de los batches.
         """
         with self.cursor() as cur:
             for index in range(0, len(song_ids), batch_size):
-                # Create our IN part of the query
+                # query
                 query = self.DELETE_SONGS % ', '.join(['%s'] * len(song_ids[index: index + batch_size]))
 
                 cur.execute(query, song_ids[index: index + batch_size])
