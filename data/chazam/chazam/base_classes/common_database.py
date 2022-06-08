@@ -116,7 +116,7 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def insert_song(self, song_name: str, file_hash: str, total_hashes: int) -> int:
         """
-        Inserts a song name into the database, returns the new
+        Inserta a song name into the database, returns the new
         identifier of the song.
 
         :param song_name: The name of the song.
