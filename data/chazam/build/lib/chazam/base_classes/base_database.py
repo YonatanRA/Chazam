@@ -6,186 +6,185 @@ from chazam.config.settings import DATABASES
 
 
 class BaseDatabase(object, metaclass=abc.ABCMeta):
-    # Name of your Database subclass, this is used in configuration
-    # to refer to your class
+    # Nombre de la subclase Database
     type = None
 
     def __init__(self):
         super().__init__()
 
     def before_fork(self) -> None:
-        '''
-        Called before the database instance is given to the new process
-        '''
+        """
+        LLamada antes de nuevo proceso de la instancia de la base de datos.
+        """
         pass
 
     def after_fork(self) -> None:
-        '''
-        Called after the database instance has been given to the new process
-
-        This will be called in the new process.
-        '''
+        """
+        LLamada después de nuevo proceso de la instancia de la base de datos.
+        Será llamada en el nuevo proceso.
+        """
         pass
 
     def setup(self) -> None:
-        '''
-        Called on creation or shortly afterwards.
-        '''
+        """
+        Llamada en la creación de tablas.
+        """
         pass
 
     @abc.abstractmethod
     def empty(self) -> None:
-        '''
-        Called when the database should be cleared of all data.
-        '''
+        """
+        Llamada cuando la base de datos está vacía.
+        """
         pass
 
     @abc.abstractmethod
     def delete_unfingerprinted_songs(self) -> None:
-        '''
-        Called to remove any song entries that do not have any fingerprints
-        associated with them.
-        '''
+        """
+        Llamada para borrar canciones no procesadas.
+        """
         pass
 
     @abc.abstractmethod
     def get_num_songs(self) -> int:
-        '''
-        Returns the song's count stored.
+        """
+        Cuenta el número de canciones.
 
-        :return: the amount of songs in the database.
-        '''
+        :return: número de canciones en la base de datos.
+        """
         pass
 
     @abc.abstractmethod
     def get_num_fingerprints(self) -> int:
-        '''
-        Returns the fingerprints' count stored.
+        """
+        Cuenta el número de fingerprints.
 
-        :return: the number of fingerprints in the database.
-        '''
+        :return: número de fingerprints en la base de datos.
+        """
         pass
 
     @abc.abstractmethod
     def set_song_fingerprinted(self, song_id: int):
-        '''
-        Sets a specific song as having all fingerprints in the database.
+        """
+        Establece si una canción ha sido procesada..
 
-        :param song_id: song identifier.
-        '''
+        :param song_id: id de la canción.
+        """
         pass
 
     @abc.abstractmethod
     def get_songs(self) -> List[Dict[str, str]]:
-        '''
-        Returns all fully fingerprinted songs in the database
+        """
+        Devuelve todas las canciones procesadas de la base de datos.
 
-        :return: a dictionary with the songs info.
-        '''
+        :return: un diccionario con toda la info de las canciones.
+        """
         pass
 
     @abc.abstractmethod
     def get_song_by_id(self, song_id: int) -> Dict[str, str]:
-        '''
-        Brings the song info from the database.
+        """
+        Info de la canción.
+        :param song_id: id de la canción.
 
-        :param song_id: song identifier.
-        :return: a song by its identifier. Result must be a Dictionary.
-        '''
+        :return: un diccionario con la info de la cancione.
+        """
         pass
 
     @abc.abstractmethod
     def insert(self, fingerprint: str, song_id: int, offset: int):
-        '''
-        Inserts a single fingerprint into the database.
-
-        :param fingerprint: Part of a sha1 hash, in hexadecimal format
-        :param song_id: Song identifier this fingerprint is off
-        :param offset: The offset this fingerprint is from.
-        '''
+        """
+        Inserta un solo fingerprint en la base de datos.
+        :param fingerprint: parte del hash sha1, hexadecimal
+        :param song_id: id de la canción.
+        :param offset: punto temporal de donde viene el fingerprint.
+        """
         pass
 
     @abc.abstractmethod
     def insert_song(self, song_name: str, file_hash: str, total_hashes: int) -> int:
-        '''
-        Inserts a song name into the database, returns the new
-        identifier of the song.
+        """
+        Inserta una canción en la base de datos, devuelve el id de la canción insertada.
 
-        :param song_name: The name of the song.
-        :param file_hash: Hash from the fingerprinted file.
-        :param total_hashes: amount of hashes to be inserted on fingerprint table.
-        :return: the inserted id.
-        '''
+        :param song_name: nombre de la canción.
+        :param file_hash: hash del archivo fingerprinteado.
+        :param total_hashes: número total de hashes insertados.
+
+        :return: id de la canción.
+        """
         pass
 
     @abc.abstractmethod
     def query(self, fingerprint: str = None) -> List[Tuple]:
-        '''
-        Returns all matching fingerprint entries associated with
-        the given hash as parameter, if None is passed it returns all entries.
+        """
+        Devuelve todas las coincidencias de fingerprints asociados con el hash.
+        Si se pasa None devuelve todas las entradas de la base de datos.
 
-        :param fingerprint: part of a sha1 hash, in hexadecimal format
-        :return: a list of fingerprint records stored in the db.
-        '''
+        :param fingerprint: parte del hash sha1, en hexadecimal
+
+        :return: una lista de los fingerprints en la base de datos.
+        """
         pass
 
     @abc.abstractmethod
     def get_iterable_kv_pairs(self) -> List[Tuple]:
-        '''
-        Returns all fingerprints in the database.
+        """
+        Devuelve todos los fingerprints en la base de datos.
 
-        :return: a list containing all fingerprints stored in the db.
-        '''
+        :return: una lista de todos los fingerprints guardados en la base de datos.
+        """
         pass
 
     @abc.abstractmethod
     def insert_hashes(self, song_id: int, hashes: List[Tuple[str, int]], batch_size: int = 1000) -> None:
-        '''
-        Insert a multitude of fingerprints.
+        """
+        Inserción multiple de fingerprints.
 
-        :param song_id: Song identifier the fingerprints belong to
-        :param hashes: A sequence of tuples in the format (hash, offset)
-            - hash: Part of a sha1 hash, in hexadecimal format
-            - offset: Offset this hash was created from/at.
-        :param batch_size: insert batches.
-        '''
+        :param song_id: id de la canción
+        :param hashes: lista de tuplas con formato (hash, offset)
+            - hash: parte del hash sha1, en hexadecimal
+            - offset: tiempo donde el hash empieza.
+        :param batch_size: tamaño de los batches.
+        """
 
     @abc.abstractmethod
     def return_matches(self, hashes: List[Tuple[str, int]], batch_size: int = 1000) \
             -> Tuple[List[Tuple[int, int]], Dict[int, int]]:
-        '''
-        Searches the database for pairs of (hash, offset) values.
+        """
+        Busca en la base de datos las parejas de valores (hash, offset).
 
-        :param hashes: A sequence of tuples in the format (hash, offset)
-            - hash: Part of a sha1 hash, in hexadecimal format
-            - offset: Offset this hash was created from/at.
-        :param batch_size: number of query's batches.
-        :return: a list of (sid, offset_difference) tuples and a
-        dictionary with the amount of hashes matched (not considering
-        duplicated hashes) in each song.
-            - song id: Song identifier
+        :param hashes: lista de tuplas con formato (hash, offset)
+            - hash: parte del hash sha1, en hexadecimal
+            - offset: tiempo donde el hash empieza.
+        :param batch_size: tamaño de los batches.
+
+        :return: una lista de tuplas (sid, offset_difference) y un
+        diccionario con la cantidad de hashes que coinciden de cada canción
+        sin considerar duplicados.
+            - song id: id de la canción
             - offset_difference: (database_offset - sampled_offset)
-        '''
+        """
         pass
 
     @abc.abstractmethod
     def delete_songs_by_id(self, song_ids: List[int], batch_size: int = 1000) -> None:
-        '''
-        Given a list of song ids it deletes all songs specified and their corresponding fingerprints.
+        """
+        Dada una lista de canciones, las borra y también sus correspondientes fingerprints.
 
-        :param song_ids: song ids to be deleted from the database.
-        :param batch_size: number of query's batches.
-        '''
+        :param song_ids: lista de ids de canciones.
+        :param batch_size: tamaño de los batches.
+        """
         pass
 
 
 def get_database(database_type: str = 'mysql') -> BaseDatabase:
-    '''
-    Given a database type it returns a database instance for that type.
+    """
+    Dado un tipo de base de datos devuelve una instancia de la misma.
 
-    :param database_type: type of the database.
-    :return: an instance of BaseDatabase depending on given database_type.
-    '''
+    :param database_type: tipo de base de datos.
+
+    :return: instancia de la base de datos.
+    """
     try:
         path, db_class_name = DATABASES[database_type]
         db_module = importlib.import_module(path)
